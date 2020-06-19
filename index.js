@@ -51,7 +51,7 @@ bot.on("message", message => {
             const helpEmbed = new Discord.MessageEmbed()
                 .setTitle("Commands")
                 .addField("General", "`help`, `about`, `info`, `rules`")
-                .addField("Moderation", "`clear`, `kick`, `ban`, `mute`, `unmute`, `lock`, `unlock`")
+                .addField("Moderation", "`clear`, `kick`, `ban`, `mute`, `unmute`, `lock`, `unlock`, `warn`, `deletewarn`")
                 .setColor("#f93a2f")
                 .setDescription("To view any of the rules, type r! and what the rule is about (e.g. to view Rule 1 you would type r!nsfw")
                 .setFooter("The default prefix is: r!")
@@ -296,6 +296,8 @@ bot.on("message", message => {
             message.channel.send(adminRulesEmbed);
             break;
         case "lock":
+            if (!message.member.roles.cache.some(r => r.name === "Moderators")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
+
             channel.overwritePermissions([{
                 id: lockRole,
                 deny: ["SEND_MESSAGES"],
@@ -303,6 +305,8 @@ bot.on("message", message => {
             message.channel.send("Successfully locked down `" + message.channel.name + "`.")
             break;
         case "unlock":
+            if (!message.member.roles.cache.some(r => r.name === "Moderators")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
+
             channel.permissionOverwrites.get(lockRole.id).delete();
             message.channel.send("Successfully unlocked `" + message.channel.name + "`.")
             break;
