@@ -17,6 +17,7 @@ bot.on("message", message => {
 
     let args = message.content.substring(PREFIX.length).split(" ")
     let channel = message.channel;
+    let serverMember = message.guild.member(message.mentions.users.first())
     if (!message.guild) return;
     let roles = message.guild.roles;
     let lockRole = roles.cache.find(r => r.name === "Verified");
@@ -62,6 +63,7 @@ bot.on("message", message => {
                     .setTitle("User Information")
                     .addField("User Name", message.author.username)
                     .addField("Account Creation Date", message.author.createdAt)
+                    .addField("Server Join Date", message.member.joinedAt)
                     .setColor("#00d166")
                     .setThumbnail(message.author.displayAvatarURL())
 
@@ -205,47 +207,36 @@ bot.on("message", message => {
             message.channel.send("Successfully cleared `" + (args[1]) + "` message(s)");
             break;
         case "kick":
-            if (!message.member.roles.cache.some(r => r.name === "Moderators")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
+            if (!message.member.roles.cache.some(r => r.name === "Moderators") && !message.member.roles.cache.some(r => r.name === "Bot Developer")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
 
-            const user = message.mentions.users.first();
+            if (!args[1]) return message.reply("Please specify what user you would like to kick.")
+            
+            if (serverMember) {
+                serverMember.kick("You were kicked from`" + message.guild.name + "`.").then(() => {
+                    message.reply("Successfully kicked`" + serverMember.tag + "`.")
+                }).catch(err => {
+                    message.reply("Unable to kick member, might be because of permissions.")
+                    console.log(err);
+                });
 
-            if (user) {
-                const member = message.guild.member(user);
-
-                if (member) {
-                    member.kick("You were kicked from " + (message.guild.name) + ".").then(() => {
-                        message.reply("Successfully kicked `" + user.tag + "`.")
-                    }).catch(err => {
-                        message.reply("Unable to kick member, might be because of permissions.")
-                        console.log(err);
-                    });
                 } else {
-                    message.reply("That user isn't in this server.")
+                    message.reply("This user is not kickable.")
                 }
-            } else {
-                message.reply("Please specify which member you would like to kick.")
-            }
             break;
         case "ban":
-            if (!message.member.roles.cache.some(r => r.name === "Moderators")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
+            if (!message.member.roles.cache.some(r => r.name === "Moderators")&& !message.member.roles.cache.some(r => r.name === "Bot Developer")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
 
-            user = message.mentions.users.first();
+            if (!args[1]) return message.reply("Please specify what user you would like to ban.")
 
-            if (user) {
-                const member = message.guild.member(user);
-
-                if (member) {
-                    member.ban({ reason: "You were banned from " + (message.guild.name + ".") }).then(() => {
-                        message.reply("Successfully kicked `" + user.tag + "`.")
-                    }).catch(err => {
-                        message.reply("Unable to ban member, might be because of permissions.")
-                        console.log(err);
-                    });
-                } else {
-                    message.reply("That user isn't in this server.")
-                }
+            if (serverMember) {
+                serverMember.ban({ reason: "You were banned from " + (message.guild.name + ".") }).then(() => {
+                    message.reply("Successfully banned `" + serverMember.tag + "`.")
+                }).catch(err => {
+                    message.reply("Unable to ban member, might be because of permissions.")
+                    console.log(err);
+                });
             } else {
-                message.reply("Please specify which member you would like to ban.")
+                message.reply("That user isn't in this server.")
             }
             break;
         case "mute":
@@ -289,13 +280,26 @@ bot.on("message", message => {
             if (!message.member.roles.cache.some(r => r.name === "Moderators")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
 
             if (!args[1]) {
-                channel.overwritePermissions([{
-                    id: lockRole,
-                    deny: ["SEND_MESSAGES"],
-                }]);
+                channel.updateOverwrite(
+                    lockRole,
+                    {SEND_MESSAGES: false}
+                );
+                channel.updateOverwrite(
+                    "Moderators",
+                    {SEND_MESSAGES: true}
+                );
 
                 message.channel.send("Successfully locked down `" + message.channel.name + "`.");
             } else {
+                channel.updateOverwrite(
+                    lockRole,
+                    {SEND_MESSAGES: false}
+                );
+                channel.updateOverwrite(
+                    "Moderators",
+                    {SEND_MESSAGES: true}
+                );
+                
                 const lockEmbed = new Discord.MessageEmbed()
                     .setTitle("Channel Lockdown")
                     .addField("Reason", args[1])
@@ -313,7 +317,14 @@ bot.on("message", message => {
             if (!message.member.roles.cache.some(r => r.name === "Moderators")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
 
             channel.permissionOverwrites.get(lockRole.id).delete();
-            message.channel.send("Successfully unlocked `" + message.channel.name + "`.")
+            const unlockEmbed = new Discord.MessageEmbed()
+                    .setTitle("Channel Unlock")
+                    .addField("Moderator", message.author)
+                    .setThumbnail("https://cdn.discordapp.com/attachments/717823988986019956/723998060207669298/unknown.png")
+                    .setColor("#008e44")
+                    .setDescription("`" + message.channel.name + "` has been unlocked.")
+
+                    message.channel.send(unlockEmbed)
             break;
         case "warn":
             if (warnTarget.roles.cache.some(r => r.name === "Warning 1") && !(warnTarget.roles.cache.some(r => r.name === "Warning 2")) && !(warnTarget.roles.cache.some(r => r.name === "Warning 3"))) {
@@ -392,6 +403,8 @@ bot.on("message", message => {
             message.channel.send(reqEmbed);
             message.channel.send("<@546208503841292288>, there's a suggestion waiting for you.")
             break;
+        case "video":
+            message.channel.send("<https://www.youtube.com/watch?v=dQw4w9WgXcQ>")
     }
 })
 
