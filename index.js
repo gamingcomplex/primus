@@ -22,6 +22,8 @@ bot.on("message", message => {
     let roles = message.guild.roles;
     let lockRole = roles.cache.find(r => r.name === "Verified");
     let person = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[1]))
+    let mainrole = message.guild.roles.cache.find(role => role.name === "Verified")
+    let muterole = message.guild.roles.cache.find(role => role.name === "Muted")
     const warn1 = message.guild.roles.cache.find(r => r.name === "Warning 1")
     const warn2 = message.guild.roles.cache.find(r => r.name === "Warning 2")
     const warn3 = message.guild.roles.cache.find(r => r.name === "Warning 3")
@@ -244,9 +246,6 @@ bot.on("message", message => {
 
             if (!person) return message.reply("That user isn't in this server.")
 
-            let mainrole = message.guild.roles.cache.find(role => role.name === "Verified")
-            let muterole = message.guild.roles.cache.find(role => role.name === "Muted")
-
             if (!muterole) return message.reply("I couldn't find a mute role.");
 
             let time = args[2];
@@ -258,12 +257,26 @@ bot.on("message", message => {
             person.roles.add(muterole.id);
             person.roles.add(mainrole.id);
 
-            message.channel.send("Successfully muted `" + person.user.tag + "` for `" + ms(ms(time)) + "`.")
+            const muteEmbed = new Discord.MessageEmbed()
+                .setTitle("Member Muted")
+                .addField("Duration", ms(ms(time)))
+                .addField("Moderator", message.author)
+                .setDescription("Successfully muted`" + person.user.tag + "` for `" + ms(ms(time)) + "`.")
+                .setColor("#cc7900")
+
+            message.channel.send(muteEmbed);
 
             setTimeout(function () {
                 person.roles.add(mainrole.id);
                 person.roles.remove(muterole.id);
-                message.channel.send("`" + person.user.tag + "` has been unmuted.")
+
+                const expireEmbed = new Discord.MessageEmbed()
+                    .setTitle("Mute Duration Expired")
+                    .addField("Duration", ms(ms(time)))
+                    .setDescription("`" + person.user.tag + "` has been unmuted.")
+                    .setColor("#008369")
+                
+                message.channel.send(expireEmbed)
             }, ms(time));
             break;
         case "unmute":
@@ -272,8 +285,15 @@ bot.on("message", message => {
             person = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[1]))
             if (!person) return message.reply("That user isn't in this server.")
 
-            person.removeRole(muterole.id);
-            message.channel.send("Successfully unmuted `" + person.user.tag + "`.")
+            person.roles.remove(muterole.id);
+
+            const unmuteEmbed = new Discord.MessageEmbed()
+                .setTitle("Member Unmuted")
+                .addField("Moderator", message.author)
+                .setDescription("Successfully unmuted `" + person.user.tag + "`.")
+                .setColor("#008369")
+                
+            message.channel.send(unmuteEmbed)
             break;
 
         case "lock":
@@ -386,7 +406,40 @@ bot.on("message", message => {
             }
             break;
         case "lenny":
+            message.channel.delete(1)
             message.channel.send("( ͡° ͜ʖ ͡°)")
+            break;
+        case "tableflip":
+            message.channel.delete(1)
+            message.channel.send("(╯°□°)╯︵ ┻━┻")
+            break;
+        case "tableplace":
+            message.channel.delete(1)
+            message.channel.send("┬──┬◡ﾉ(° -°ﾉ)")
+            break;
+        case "cry":
+            message.channel.delete(1)
+            message.channel.send("ಥʖ̯ಥ")
+            break;
+        case "sunglasses":
+            message.channel.delete(1)
+            message.channel.send("(▀̿Ĺ̯▀̿ ̿)")
+            break;
+        case "ak47":
+            message.channel.delete(1)
+            message.channel.send("━╤デ╦︻(▀̿̿Ĺ̯̿̿▀̿ ̿)")
+            break;
+        case "middlefinger":
+            message.channel.delete(1)
+            message.channel.send("╭∩╮( ͡° ͜ʖ ͡°)╭∩╮")
+            break;
+        case "creepyshrug":
+            message.channel.delete(1)
+            message.channel.send("┐(͠≖ ͜ʖ͠≖)┌")
+            break;
+        case "wink":
+            message.channel.delete(1)
+            message.channel.send("° ͜ʖ ͡ – ✧")
             break;
         case "requestcmd":
             let reqer = message.author;
