@@ -406,39 +406,30 @@ bot.on("message", message => {
             }
             break;
         case "lenny":
-            message.channel.delete(1)
             message.channel.send("( ͡° ͜ʖ ͡°)")
             break;
         case "tableflip":
-            message.channel.delete(1)
             message.channel.send("(╯°□°)╯︵ ┻━┻")
             break;
         case "tableplace":
-            message.channel.delete(1)
             message.channel.send("┬──┬◡ﾉ(° -°ﾉ)")
             break;
         case "cry":
-            message.channel.delete(1)
             message.channel.send("ಥʖ̯ಥ")
             break;
         case "sunglasses":
-            message.channel.delete(1)
             message.channel.send("(▀̿Ĺ̯▀̿ ̿)")
             break;
         case "ak47":
-            message.channel.delete(1)
             message.channel.send("━╤デ╦︻(▀̿̿Ĺ̯̿̿▀̿ ̿)")
             break;
         case "middlefinger":
-            message.channel.delete(1)
             message.channel.send("╭∩╮( ͡° ͜ʖ ͡°)╭∩╮")
             break;
         case "creepyshrug":
-            message.channel.delete(1)
             message.channel.send("┐(͠≖ ͜ʖ͠≖)┌")
             break;
         case "wink":
-            message.channel.delete(1)
             message.channel.send("° ͜ʖ ͡ – ✧")
             break;
         case "requestcmd":
