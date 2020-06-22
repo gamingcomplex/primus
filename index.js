@@ -7,7 +7,7 @@ const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XtbuCw.m_MebsUHnQYKaiFqE4U_Du23Xx4";
 
 const PREFIX = "r!";
 
-var version = "Official Release 1.0.1";
+var version = "Official Release 1.1.0";
 
 bot.on("ready", () => {
     console.log("Bot has started!");
@@ -420,7 +420,7 @@ bot.on("message", message => {
         case "sunglasses":
             message.channel.send("(▀̿Ĺ̯▀̿ ̿)")
             break;
-        case "ak47":
+        case "gun":
             message.channel.send("━╤デ╦︻(▀̿̿Ĺ̯̿̿▀̿ ̿)")
             break;
         case "middlefinger":
