@@ -42,6 +42,7 @@ bot.on("message", message => {
                 .setTitle("Commands")
                 .addField("General", "`help`, `about`, `info`, `rules`")
                 .addField("Moderation", "`clear`, `kick`, `ban`, `mute`, `unmute`, `lock`, `unlock`, `warn`, `deletewarn`")
+                .addField("Lenny", "`lenny`, `tableflip`, `tableplace`, `cry`, `sunglasses`, `middlefinger`, `creepyshrug`, `wink`")
                 .setColor("#f93a2f")
                 .setDescription("To view any of the rules, type r! and what the rule is about (e.g. to view Rule 1 you would type r!nsfw")
                 .setFooter("The default prefix is: r!")
@@ -205,7 +206,6 @@ bot.on("message", message => {
 
             if (!args[1]) return message.reply("Please specify the amount of messages you want to delete.")
             message.channel.bulkDelete(args[1]);
-            message.channel.delete(1);
             message.channel.send("Successfully cleared `" + (args[1]) + "` message(s)");
             break;
         case "kick":
