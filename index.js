@@ -17,8 +17,8 @@ bot.on("message", message => {
 
     let args = message.content.substring(PREFIX.length).split(" ")
     let channel = message.channel;
-    let serverMember = message.guild.member(message.mentions.users.first())
     if (!message.guild) return;
+    let serverMember = message.guild.member(message.mentions.users.first())
     let roles = message.guild.roles;
     let lockRole = roles.cache.find(r => r.name === "Verified");
     let person = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[1]))
