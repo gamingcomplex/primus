@@ -1,19 +1,31 @@
 const Discord = require("discord.js");
 const { Client, Attachment, MessageEmbed } = require("discord.js");
-const bot = new Client();
+const db = require("quick.db");
+const bot = new Discord.Client();
 const ms = require("ms");
 
 const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XtbuCw.m_MebsUHnQYKaiFqE4U_Du23Xx4";
 
 const PREFIX = "r!";
 
-var version = "Official Release 1.1.0";
+var version = "Official Release 1.1.1";
 
 bot.on("ready", () => {
+     bot.user.setActivity("r!help", { type: "PLAYING" })
+
+    let allUsers = bot.users;
+    for (let i = 0; i < allUsers.length; i++) {
+        if (isNull(db.get(allUsers[i].id))) {
+            db.set(allUsers[i].id, { money: 500, items: [] })
+        }
+    }
+
     console.log("Bot has started!");
 })
+var blacklist = [];
 
 bot.on("message", message => {
+    if (blacklist.includes(message.author.id)) return;
 
     let args = message.content.substring(PREFIX.length).split(" ")
     let channel = message.channel;
@@ -30,8 +42,31 @@ bot.on("message", message => {
     const warn4 = message.guild.roles.cache.find(r => r.name === "Warning 4")
     const warn5 = message.guild.roles.cache.find(r => r.name === "Warning 5")
     let warnTarget = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[1]))
+    var blacklistMessage = ("Are you **__ABSOLUTELY__** sure that you want to blacklist this user? This will mean that I will no longer respond to any of their commands.")
 
     switch (args[0]) {
+        case "blacklist":
+            if (!message.member.roles.cache.some(r => r.name === "Bot Developer")) return message.channel.reply("Don't even think about it.")
+
+            if (!args[1]) return message.reply("Please specify which user you would like to blacklist.")
+
+            if (person) {
+                message.reply("Are you **__ABSOLUTELY__** sure that you want to blacklist this user? This will mean that I will no longer respond to any of their commands.")
+                    .then(message => {
+                        message.react("✅")
+                        message.awaitReactions((reaction, user) => user.id === message.author.id && (reaction.emoji.name === "✅"),
+                            { max: 1, time: 10000 }).then(collected => {
+                                if (collected.first().emoji.name === "✅") {
+                                    blacklist.push(person.id);
+                                    message.channel.send("Successfully blacklisted `" + person.id + "`. They will no longer be able to use commands.")
+                                } else {
+                                    message.reply("Operation canceled.")
+                                }
+                            }).catch(() => {
+                                message.reply("No reaction in 10 seconds, operation canceled.")
+                            });
+                    })
+            }
         case "ping":
             if (!message.member.roles.cache.some(r => r.name === "Moderators")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
 
@@ -211,22 +246,27 @@ bot.on("message", message => {
         case "kick":
             if (!message.member.roles.cache.some(r => r.name === "Moderators") && !message.member.roles.cache.some(r => r.name === "Bot Developer")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
 
+            if (message.member.roles.cache.some(r => r.name === "Bot Developer")) return message.reply("don't even try. Just because you coded me doesn't mean you can abuse your power.")
+
             if (!args[1]) return message.reply("Please specify what user you would like to kick.")
-            
+
             if (serverMember) {
                 serverMember.kick("You were kicked from`" + message.guild.name + "`.").then(() => {
                     message.reply("Successfully kicked`" + serverMember.tag + "`.")
                 }).catch(err => {
                     message.reply("Unable to kick member, might be because of permissions.")
+                    message.channel.send("```" + err + "```")
                     console.log(err);
                 });
 
-                } else {
-                    message.reply("This user is not kickable.")
-                }
+            } else {
+                message.reply("This user is not kickable.")
+            }
             break;
         case "ban":
-            if (!message.member.roles.cache.some(r => r.name === "Moderators")&& !message.member.roles.cache.some(r => r.name === "Bot Developer")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
+            if (!message.member.roles.cache.some(r => r.name === "Moderators") && !message.member.roles.cache.some(r => r.name === "Bot Developer")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
+
+            if (message.member.roles.cache.some(r => r.name === "Bot Developer")) return message.reply("don't even try. Just because you coded me doesn't mean you can abuse your power.")
 
             if (!args[1]) return message.reply("Please specify what user you would like to ban.")
 
@@ -235,6 +275,7 @@ bot.on("message", message => {
                     message.reply("Successfully banned `" + serverMember.tag + "`.")
                 }).catch(err => {
                     message.reply("Unable to ban member, might be because of permissions.")
+                    message.channel.send("```" + err + "```")
                     console.log(err);
                 });
             } else {
@@ -275,7 +316,7 @@ bot.on("message", message => {
                     .addField("Duration", ms(ms(time)))
                     .setDescription("`" + person.user.tag + "` has been unmuted.")
                     .setColor("#008369")
-                
+
                 message.channel.send(expireEmbed)
             }, ms(time));
             break;
@@ -292,7 +333,7 @@ bot.on("message", message => {
                 .addField("Moderator", message.author)
                 .setDescription("Successfully unmuted `" + person.user.tag + "`.")
                 .setColor("#008369")
-                
+
             message.channel.send(unmuteEmbed)
             break;
 
@@ -302,24 +343,24 @@ bot.on("message", message => {
             if (!args[1]) {
                 channel.updateOverwrite(
                     lockRole,
-                    {SEND_MESSAGES: false}
+                    { SEND_MESSAGES: false }
                 );
                 channel.updateOverwrite(
                     "Moderators",
-                    {SEND_MESSAGES: true}
+                    { SEND_MESSAGES: true }
                 );
 
                 message.channel.send("Successfully locked down `" + message.channel.name + "`.");
             } else {
                 channel.updateOverwrite(
                     lockRole,
-                    {SEND_MESSAGES: false}
+                    { SEND_MESSAGES: false }
                 );
                 channel.updateOverwrite(
                     "Moderators",
-                    {SEND_MESSAGES: true}
+                    { SEND_MESSAGES: true }
                 );
-                
+
                 const lockEmbed = new Discord.MessageEmbed()
                     .setTitle("Channel Lockdown")
                     .addField("Reason", args[1])
@@ -329,7 +370,7 @@ bot.on("message", message => {
                     .setDescription("`" + message.channel.name + "` has been locked down.")
                     .setFooter("Don't use the other channels to talk because this one is locked down. The channel was locked down for a reason.")
 
-                    message.channel.send(lockEmbed)
+                message.channel.send(lockEmbed)
             }
 
             break;
@@ -338,13 +379,13 @@ bot.on("message", message => {
 
             channel.permissionOverwrites.get(lockRole.id).delete();
             const unlockEmbed = new Discord.MessageEmbed()
-                    .setTitle("Channel Unlock")
-                    .addField("Moderator", message.author)
-                    .setThumbnail("https://cdn.discordapp.com/attachments/717823988986019956/723998060207669298/unknown.png")
-                    .setColor("#008e44")
-                    .setDescription("`" + message.channel.name + "` has been unlocked.")
+                .setTitle("Channel Unlock")
+                .addField("Moderator", message.author)
+                .setThumbnail("https://cdn.discordapp.com/attachments/717823988986019956/723998060207669298/unknown.png")
+                .setColor("#008e44")
+                .setDescription("`" + message.channel.name + "` has been unlocked.")
 
-                    message.channel.send(unlockEmbed)
+            message.channel.send(unlockEmbed)
             break;
         case "warn":
             if (warnTarget.roles.cache.some(r => r.name === "Warning 1") && !(warnTarget.roles.cache.some(r => r.name === "Warning 2")) && !(warnTarget.roles.cache.some(r => r.name === "Warning 3"))) {
@@ -449,6 +490,34 @@ bot.on("message", message => {
             break;
         case "video":
             message.channel.send("<https://www.youtube.com/watch?v=dQw4w9WgXcQ>")
+            break;
+    }
+    if (message.content.includes("no u")) {
+        message.react("663955085729988639");
+    }
+    if (message.content.includes("lmao")) {
+        message.react("😂");
+    }
+    if (message.content.includes("norman")) {
+        message.react("713121792281018468");
+    }
+    if (message.content.includes("kamran")) {
+        message.react("🤮");
+    }
+    if (message.content.includes("oliver")) {
+        message.react("🇴")
+            .then(() => message.react("🇱"))
+            .then(() => message.react("🇮"))
+            .then(() => message.react("🇨"))
+            .then(() => message.react("🇪"))
+            .then(() => message.react("🇷"))
+    }
+    if (message.content.includes("neal")) {
+        message.react("663950022601211926")
+            .then(() => message.react("🇲"))
+            .then(() => message.react("🇪"))
+            .then(() => message.react("🇦"))
+            .then(() => message.react("🇱"))
     }
 })
 
