@@ -1,6 +1,5 @@
 const Discord = require("discord.js");
 const { Client, Attachment, MessageEmbed } = require("discord.js");
-const db = require("quick.db");
 const bot = new Discord.Client();
 const ms = require("ms");
 
@@ -12,14 +11,6 @@ var version = "Official Release 1.1.1";
 
 bot.on("ready", () => {
      bot.user.setActivity("r!help", { type: "PLAYING" })
-
-    let allUsers = bot.users;
-    for (let i = 0; i < allUsers.length; i++) {
-        if (isNull(db.get(allUsers[i].id))) {
-            db.set(allUsers[i].id, { money: 500, items: [] })
-        }
-    }
-
     console.log("Bot has started!");
 })
 var blacklist = [];
