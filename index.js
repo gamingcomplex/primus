@@ -3,7 +3,7 @@ const { Client, Attachment, MessageEmbed } = require("discord.js");
 const bot = new Discord.Client();
 const ms = require("ms");
 const fs = require("fs");
-const money = require("C:/Users/Hong Shu/Desktop/Discord Bot/money.json")
+const money = require("./money.json")
 
 const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XtbuCw.m_MebsUHnQYKaiFqE4U_Du23Xx4";
 
@@ -500,7 +500,7 @@ bot.on("message", message => {
                 money[userr.id] = {
                     money: 500
                 }
-                fs.writeFile("C:/Users/Hong Shu/Desktop/Discord Bot/money.json", JSON.stringify(money), (err) => {
+                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
                     if (err) message.channel.send(`\`\`\`${err}\`\`\``)
                 });
                 message.reply("you have successfully been initialized into the currency system and given `500` coins.")
