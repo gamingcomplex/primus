@@ -2,15 +2,17 @@ const Discord = require("discord.js");
 const { Client, Attachment, MessageEmbed } = require("discord.js");
 const bot = new Discord.Client();
 const ms = require("ms");
+const fs = require("fs");
+const money = require("C:/Users/Hong Shu/Desktop/Discord Bot/money.json")
 
 const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XtbuCw.m_MebsUHnQYKaiFqE4U_Du23Xx4";
 
 const PREFIX = "r!";
 
-var version = "Official Release 1.1.1";
+var version = "Official Release 1.1.2";
 
 bot.on("ready", () => {
-     bot.user.setActivity("r!help", { type: "PLAYING" })
+    bot.user.setActivity("r!help", { type: "PLAYING" })
     console.log("Bot has started!");
 })
 var blacklist = [];
@@ -482,33 +484,38 @@ bot.on("message", message => {
         case "video":
             message.channel.send("<https://www.youtube.com/watch?v=dQw4w9WgXcQ>")
             break;
+        case "bal":
+            if (!args[0]) {
+                var userr = message.author;
+            } else {
+                var userr = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0])) 
+            }
+
+            if (userr = null) {
+                message.channel.send("bruh ur null")
+            }
+
+            userr = message.author;
+            if (money[userr.id] == null) {
+                money[userr.id] = {
+                    money: 500
+                }
+                fs.writeFile("C:/Users/Hong Shu/Desktop/Discord Bot/money.json", JSON.stringify(money), (err) => {
+                    if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                });
+                message.reply("you have successfully been initialized into the currency system and given `500` coins.")
+            }
+
+            message.channel.send(`\`${bot.users.cache.get(userr.id).username}\` has $${money[userr.id].money}`)
     }
     if (message.content.includes("no u")) {
         message.react("663955085729988639");
-    }
-    if (message.content.includes("lmao")) {
-        message.react("😂");
     }
     if (message.content.includes("norman")) {
         message.react("713121792281018468");
     }
     if (message.content.includes("kamran")) {
         message.react("🤮");
-    }
-    if (message.content.includes("oliver")) {
-        message.react("🇴")
-            .then(() => message.react("🇱"))
-            .then(() => message.react("🇮"))
-            .then(() => message.react("🇨"))
-            .then(() => message.react("🇪"))
-            .then(() => message.react("🇷"))
-    }
-    if (message.content.includes("neal")) {
-        message.react("663950022601211926")
-            .then(() => message.react("🇲"))
-            .then(() => message.react("🇪"))
-            .then(() => message.react("🇦"))
-            .then(() => message.react("🇱"))
     }
 })
 
