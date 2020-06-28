@@ -71,6 +71,7 @@ bot.on("message", message => {
                 .addField("General", "`help`, `about`, `info`, `rules`")
                 .addField("Moderation", "`clear`, `kick`, `ban`, `mute`, `unmute`, `lock`, `unlock`, `warn`, `deletewarn`")
                 .addField("Lenny", "`lenny`, `tableflip`, `tableplace`, `cry`, `sunglasses`, `middlefinger`, `creepyshrug`, `wink`")
+                .addField("Fun", "`8ball`, `bal`")
                 .setColor("#f93a2f")
                 .setDescription("To view any of the rules, type r! and what the rule is about (e.g. to view Rule 1 you would type r!nsfw")
                 .setFooter("The default prefix is: r!")
@@ -484,11 +485,39 @@ bot.on("message", message => {
         case "video":
             message.channel.send("<https://www.youtube.com/watch?v=dQw4w9WgXcQ>")
             break;
+        case "8ball":
+            var answers = [
+                "Yes, ofc!",
+                "Ofc not.",
+                "Maybe 🤔",
+                "wE'lL nEvEr KnOw... 👐",
+                "Only if you say that Rancho Bot is best bot in <#598727852103565332>",
+                "Ask again later 🕒",
+                "What part of \"Ask again Later\" don't you understand??? 😒",
+                "Only if my nickname is `Rancho Bot // r!`",
+                "Not now, but maybe later.",
+                "Yes, but only for the time being.",
+                "ur mum gae LMAO roted!!!11!1!!!!funniiiiiiii!!!11!1!!!roasted-->rosted-->roted-->!!!11!!1!",
+                "Always.",
+                "Never!"
+            ]
+
+            if (!args[1]) return message.channel.send("Mate, I can't give an answer to nothing.");
+
+            const ballEmbed = new Discord.MessageEmbed()
+                .setTitle("Rancho Bot's Magic 8 Ball")
+                .addField("Question", args[1])
+                .addField("Answer", (answers[Math.floor(Math.random() * answers.length)]))
+                .addField("Asked by", message.author)
+                .setColor("#603084")
+                .setThumbnail("https://static.thenounproject.com/png/124586-200.png")
+            message.channel.send(ballEmbed);
+            break;
         case "bal":
             if (!args[0]) {
                 var userr = message.author;
             } else {
-                var userr = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0])) 
+                var userr = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]))
             }
 
             if (userr = null) {
