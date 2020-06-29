@@ -5,7 +5,7 @@ const ms = require("ms");
 const fs = require("fs");
 const money = require("./money.json")
 
-const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XtbuCw.m_MebsUHnQYKaiFqE4U_Du23Xx4";
+const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XvpLxw.hmHLaGN6PIiGT_jK2qNqB0OOe4Y";
 
 const PREFIX = "r!";
 
@@ -85,7 +85,7 @@ bot.on("message", message => {
                 .addField("Creator/Developer", "The Gaming Complex#3879")
                 .addField("Beta Tester", "SansMLGDunker#6909")
                 .setColor("#0099e1")
-                .setThumbnail("https://cdn.discordapp.com/icons/598726673885822977/8b1319e63d508b2a0dac7bc18ee97c12.webp?size=128")
+                .setThumbnail("https://cdn.discordapp.com/attachments/583074971916435478/720365830709313640/RanchoServerIcon.jpg")
 
             message.channel.send(aboutEmbed);
             break;
