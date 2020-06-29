@@ -9,7 +9,7 @@ const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XvpLxw.hmHLaGN6PIiGT_jK2qNqB0OOe4Y";
 
 const PREFIX = "r!";
 
-var version = "Official Release 1.1.3";
+var version = "Official Release 1.1.4";
 
 bot.on("ready", () => {
     bot.user.setActivity("r!help", { type: "PLAYING" })
@@ -21,14 +21,15 @@ bot.on("message", message => {
     if (blacklist.includes(message.author.id)) return;
 
     let args = message.content.substring(PREFIX.length).split(" ")
-    let channel = message.channel;
+
     if (!message.guild) return;
-    let serverMember = message.guild.member(message.mentions.users.first())
+    let channel = message.channel;
+    let person = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[1]))
     let roles = message.guild.roles;
     let lockRole = roles.cache.find(r => r.name === "Verified");
-    let person = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[1]))
     let mainrole = message.guild.roles.cache.find(role => role.name === "Verified")
     let muterole = message.guild.roles.cache.find(role => role.name === "Muted")
+    var warnNum;
     const warn1 = message.guild.roles.cache.find(r => r.name === "Warning 1")
     const warn2 = message.guild.roles.cache.find(r => r.name === "Warning 2")
     const warn3 = message.guild.roles.cache.find(r => r.name === "Warning 3")
@@ -244,9 +245,9 @@ bot.on("message", message => {
 
             if (!args[1]) return message.reply("Please specify what user you would like to kick.")
 
-            if (serverMember) {
-                serverMember.kick("You were kicked from`" + message.guild.name + "`.").then(() => {
-                    message.reply("Successfully kicked`" + serverMember.tag + "`.")
+            if (person) {
+                person.kick("You were kicked from`" + message.guild.name + "`.").then(() => {
+                    message.reply("Successfully kicked`" + person.tag + "`.")
                 }).catch(err => {
                     message.reply("Unable to kick member, might be because of permissions.")
                     message.channel.send("```" + err + "```")
@@ -264,9 +265,9 @@ bot.on("message", message => {
 
             if (!args[1]) return message.reply("Please specify what user you would like to ban.")
 
-            if (serverMember) {
-                serverMember.ban({ reason: "You were banned from " + (message.guild.name + ".") }).then(() => {
-                    message.reply("Successfully banned `" + serverMember.tag + "`.")
+            if (person) {
+                person.ban({ reason: "You were banned from " + (message.guild.name + ".") }).then(() => {
+                    message.reply("Successfully banned `" + person.tag + "`.")
                 }).catch(err => {
                     message.reply("Unable to ban member, might be because of permissions.")
                     message.channel.send("```" + err + "```")
@@ -297,7 +298,7 @@ bot.on("message", message => {
                 .addField("Duration", ms(ms(time)))
                 .addField("Moderator", message.author)
                 .setDescription("Successfully muted`" + person.user.tag + "` for `" + ms(ms(time)) + "`.")
-                .setColor("#cc7900")
+                .setColor("#45241c")
 
             message.channel.send(muteEmbed);
 
@@ -360,7 +361,7 @@ bot.on("message", message => {
                     .addField("Reason", args[1])
                     .addField("Moderator", message.author)
                     .setThumbnail("https://image.flaticon.com/icons/png/512/891/891399.png")
-                    .setColor("#a62019")
+                    .setColor("#ffc107")
                     .setDescription("`" + message.channel.name + "` has been locked down.")
                     .setFooter("Don't use the other channels to talk because this one is locked down. The channel was locked down for a reason.")
 
@@ -382,49 +383,68 @@ bot.on("message", message => {
             message.channel.send(unlockEmbed)
             break;
         case "warn":
+            if (!message.member.roles.cache.some(r => r.name === "Moderators")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
+
+            if (!args[1]) return message.reply("please specify the member you would like to warn.");
+
+            if (!args[2]) return message.reply("please specify a reason for the warning.")
+
             if (warnTarget.roles.cache.some(r => r.name === "Warning 1") && !(warnTarget.roles.cache.some(r => r.name === "Warning 2")) && !(warnTarget.roles.cache.some(r => r.name === "Warning 3"))) {
                 warnTarget.roles.add(warn2);
-                message.channel.send("`" + warnTarget.user.tag + "` has been warned. This is warning number `2`.")
+                warnNum = "2";
             } else {
                 if (warnTarget.roles.cache.some(r => r.name === "Warning 2") && !(warnTarget.roles.cache.some(r => r.name === "Warning 3"))) {
                     warnTarget.roles.add(warn3);
-                    message.channel.send("`" + warnTarget.user.tag + "` has been warned. This is warning number `3`.")
+                    warnNum = "3";
                 } else {
                     if (warnTarget.roles.cache.some(r => r.name === "Warning 3") && !(warnTarget.roles.cache.some(r => r.name === "Warning 4"))) {
                         warnTarget.roles.add(warn4)
-                        message.channel.send("`" + warnTarget.user.tag + "` has been warned. This is warning number `4`.")
+                        warnNum = "4";
                     } else {
                         if (warnTarget.roles.cache.some(r => r.name === "Warning 4") && !(warnTarget.roles.cache.some(r => r.name === "Warning 5"))) {
-                            warnTarget.roles.add(warn4)
-                            message.channel.send("`" + warnTarget.user.tag + "` has been warned. This is warning number `5`.")
+                            warnTarget.roles.add(warn5)
+                            warnNum = "5";
                         } else {
                             warnTarget.roles.add(warn1);
-                            message.channel.send("`" + warnTarget.user.tag + "` has been warned. This is warning number `1`.")
+                            warnNum = "1";
                         }
                     }
                 }
             }
+            const warnEmbed = new Discord.MessageEmbed()
+                .setTitle("Member Warned")
+                .setDescription("`" + warnTarget.user.tag + "` was warned.")
+                .addField("Reason", args[2])
+                .addField("Warning Number", warnNum)
+                .addField("Moderator", message.author)
+                .setColor("#d9534f")
+            message.channel.send(warnEmbed);
+
             break;
         case "deletewarn":
+            if (!message.member.roles.cache.some(r => r.name === "Moderators")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
+
+            if (!args[1]) return message.reply("please specify the member you would like to delete a warn for.");
+
             if (warnTarget.roles.cache.some(r => r.name === "Warning 1") && !(warnTarget.roles.cache.some(r => r.name === "Warning 2")) && !(warnTarget.roles.cache.some(r => r.name === "Warning 3"))) {
                 warnTarget.roles.remove(warn1);
-                message.channel.send("Deleted one warning for `" + warnTarget.user.tag + "`. They now have `0` warnings.")
+                warnNum = "0";
             } else {
                 if (warnTarget.roles.cache.some(r => r.name === "Warning 2") && !(warnTarget.roles.cache.some(r => r.name === "Warning 3"))) {
                     warnTarget.roles.remove(warn2);
-                    message.channel.send("Deleted one warning for `" + warnTarget.user.tag + "`. They now have `1` warning.")
+                    warnNum = "1";
                 } else {
                     if (warnTarget.roles.cache.some(r => r.name === "Warning 3") && !(warnTarget.roles.cache.some(r => r.name === "Warning 4"))) {
-                        message.channel.send("Deleted one warning for `" + warnTarget.user.tag + "`. They now have `2` warnings.")
                         warnTarget.roles.remove(warn3);
+                        warnNum = "2";
                     } else {
                         if (warnTarget.roles.cache.some(r => r.name === "Warning 4") && !(warnTarget.roles.cache.some(r => r.name === "Warning 5"))) {
-                            message.channel.send("Deleted one warning for `" + warnTarget.user.tag + "`. They now have `3` warnings.")
                             warnTarget.roles.remove(warn4);
+                            warnNum = "3";
                         } else {
                             if (warnTarget.roles.cache.some(r => r.name === "Warning 5")) {
-                                message.channel.send("Deleted one warning for `" + warnTarget.user.tag + "`. They now have `4` warnings.")
                                 warnTarget.roles.remove(warn5);
+                                warnNum = "4";
                             } else {
                                 message.channel.send("This user does not have any warnings.")
                             }
@@ -432,6 +452,14 @@ bot.on("message", message => {
                     }
                 }
             }
+            const unwarnEmbed = new Discord.MessageEmbed()
+                .setTitle("Member Unwarned")
+                .setDescription("`" + warnTarget.user.tag + "` was unwarned.")
+                .addField("Warning Number", warnNum)
+                .addField("Moderator", message.author)
+                .setColor("#5cb85c")
+            message.channel.send(unwarnEmbed);
+
             break;
         case "confiemra":
             if (!args[1]) {
