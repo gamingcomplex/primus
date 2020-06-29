@@ -9,7 +9,7 @@ const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XtbuCw.m_MebsUHnQYKaiFqE4U_Du23Xx4";
 
 const PREFIX = "r!";
 
-var version = "Official Release 1.1.2";
+var version = "Official Release 1.1.3";
 
 bot.on("ready", () => {
     bot.user.setActivity("r!help", { type: "PLAYING" })
@@ -506,7 +506,7 @@ bot.on("message", message => {
 
             const ballEmbed = new Discord.MessageEmbed()
                 .setTitle("Rancho Bot's Magic 8 Ball")
-                .addField("Question", args)
+                .addField("Question", args.slice(1).join(" "))
                 .addField("Answer", (answers[Math.floor(Math.random() * answers.length)]))
                 .addField("Asked by", message.author)
                 .setColor("#603084")
