@@ -506,7 +506,7 @@ bot.on("message", message => {
 
             const ballEmbed = new Discord.MessageEmbed()
                 .setTitle("Rancho Bot's Magic 8 Ball")
-                .addField("Question", args[1])
+                .addField("Question", args)
                 .addField("Answer", (answers[Math.floor(Math.random() * answers.length)]))
                 .addField("Asked by", message.author)
                 .setColor("#603084")
