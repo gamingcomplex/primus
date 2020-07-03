@@ -1,15 +1,16 @@
-const Discord = require("discord.js");
-const { Client, Attachment, MessageEmbed } = require("discord.js");
+const Discord = require("discord.js"); const { Client, Attachment, MessageEmbed } = require("discord.js");
 const bot = new Discord.Client();
 const ms = require("ms");
 const fs = require("fs");
+const parsems = require("parse-ms")
 const money = require("./money.json")
+const cooldowns = require("./cooldowns.json")
 
 const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XvpLxw.hmHLaGN6PIiGT_jK2qNqB0OOe4Y";
 
 const PREFIX = "r!";
 
-var version = "Official Release 1.1.4";
+var version = "Official Release 1.1.5";
 
 bot.on("ready", () => {
     bot.user.setActivity("r!help", { type: "PLAYING" })
@@ -29,7 +30,7 @@ bot.on("message", message => {
     let lockRole = roles.cache.find(r => r.name === "Verified");
     let mainrole = message.guild.roles.cache.find(role => role.name === "Verified")
     let muterole = message.guild.roles.cache.find(role => role.name === "Muted")
-    var warnNum;
+    var warnNum = 0;
     const warn1 = message.guild.roles.cache.find(r => r.name === "Warning 1")
     const warn2 = message.guild.roles.cache.find(r => r.name === "Warning 2")
     const warn3 = message.guild.roles.cache.find(r => r.name === "Warning 3")
@@ -37,6 +38,7 @@ bot.on("message", message => {
     const warn5 = message.guild.roles.cache.find(r => r.name === "Warning 5")
     let warnTarget = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[1]))
     var blacklistMessage = ("Are you **__ABSOLUTELY__** sure that you want to blacklist this user? This will mean that I will no longer respond to any of their commands.")
+    const logChannel = bot.channels.cache.get("704448219618345001");
 
     switch (args[0]) {
         case "blacklist":
@@ -52,7 +54,7 @@ bot.on("message", message => {
                             { max: 1, time: 10000 }).then(collected => {
                                 if (collected.first().emoji.name === "✅") {
                                     blacklist.push(person.id);
-                                    message.channel.send("Successfully blacklisted `" + person.id + "`. They will no longer be able to use commands.")
+                                    message.channel.send("Successfully blacklisted `" + person.user.tag + "`. They will no longer be able to use commands.")
                                 } else {
                                     message.reply("Operation canceled.")
                                 }
@@ -107,6 +109,7 @@ bot.on("message", message => {
                     .setTitle("User Information")
                     .addField("User Name", user.username)
                     .addField("Account Creation Date", user.createdAt)
+                    .addField("Server Join Date", message.guild.member(message.mentions.users.first()).joinedAt)
                     .setColor("#00d166")
                     .setThumbnail(user.displayAvatarURL())
                 message.channel.send(userEmbed);
@@ -245,12 +248,21 @@ bot.on("message", message => {
 
             if (!args[1]) return message.reply("Please specify what user you would like to kick.")
 
+            if (!args[2]) return message.reply("Please specify a reason for the kick.")
+
             if (person) {
                 person.kick("You were kicked from`" + message.guild.name + "`.").then(() => {
-                    message.reply("Successfully kicked`" + person.tag + "`.")
+                    const kickEmbed = new Discord.MessageEmbed()
+                        .setTitle("Member Kicked")
+                        .setDescription(`Successfully kicked \`${person.user.tag}\`.`)
+                        .addField("Reason", args[2])
+                        .addField("Moderator", message.author)
+                        .setColor("#f0ad4e")
+                    message.channel.send(kickEmbed);
+                    logChannel.send(kickEmbed);
                 }).catch(err => {
                     message.reply("Unable to kick member, might be because of permissions.")
-                    message.channel.send("```" + err + "```")
+                    message.channel.send(`\`\`\`${err}\`\`\``)
                     console.log(err);
                 });
 
@@ -267,10 +279,17 @@ bot.on("message", message => {
 
             if (person) {
                 person.ban({ reason: "You were banned from " + (message.guild.name + ".") }).then(() => {
-                    message.reply("Successfully banned `" + person.tag + "`.")
+                    const banEmbed = new Discord.MessageEmbed()
+                        .setTitle("Member Banned")
+                        .setDescription(`Successfully banned \`${person.user.tag}\`.`)
+                        .addField("Reason", args[2])
+                        .addField("Moderator", message.author)
+                        .setColor("")
+                    message.channel.send(banEmbed);
+                    logChannel.send(banEmbed);
                 }).catch(err => {
                     message.reply("Unable to ban member, might be because of permissions.")
-                    message.channel.send("```" + err + "```")
+                    message.channel.send(`\`\`\`${err}\`\`\``)
                     console.log(err);
                 });
             } else {
@@ -301,6 +320,7 @@ bot.on("message", message => {
                 .setColor("#45241c")
 
             message.channel.send(muteEmbed);
+            logChannel.channel.send(muteEmbed);
 
             setTimeout(function () {
                 person.roles.add(mainrole.id);
@@ -312,7 +332,8 @@ bot.on("message", message => {
                     .setDescription("`" + person.user.tag + "` has been unmuted.")
                     .setColor("#008369")
 
-                message.channel.send(expireEmbed)
+                message.channel.send(expireEmbed);
+                logChannel.channel.send(expireEmbed);
             }, ms(time));
             break;
         case "unmute":
@@ -329,7 +350,8 @@ bot.on("message", message => {
                 .setDescription("Successfully unmuted `" + person.user.tag + "`.")
                 .setColor("#008369")
 
-            message.channel.send(unmuteEmbed)
+            message.channel.send(unmuteEmbed);
+            logChannel.channel.send(unmuteEmbed);
             break;
 
         case "lock":
@@ -365,7 +387,8 @@ bot.on("message", message => {
                     .setDescription("`" + message.channel.name + "` has been locked down.")
                     .setFooter("Don't use the other channels to talk because this one is locked down. The channel was locked down for a reason.")
 
-                message.channel.send(lockEmbed)
+                message.channel.send(lockEmbed);
+                logChannel.channel.send(lockEmbed);
             }
 
             break;
@@ -380,11 +403,10 @@ bot.on("message", message => {
                 .setColor("#008e44")
                 .setDescription("`" + message.channel.name + "` has been unlocked.")
 
-            message.channel.send(unlockEmbed)
+            message.channel.send(unlockEmbed);
+            logChannel.channel.send(unlockEmbed);
             break;
         case "warn":
-            if (!message.member.roles.cache.some(r => r.name === "Moderators")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
-
             if (!args[1]) return message.reply("please specify the member you would like to warn.");
 
             if (!args[2]) return message.reply("please specify a reason for the warning.")
@@ -419,6 +441,7 @@ bot.on("message", message => {
                 .addField("Moderator", message.author)
                 .setColor("#d9534f")
             message.channel.send(warnEmbed);
+            logChannel.send(warnEmbed);
 
             break;
         case "deletewarn":
@@ -459,8 +482,183 @@ bot.on("message", message => {
                 .addField("Moderator", message.author)
                 .setColor("#5cb85c")
             message.channel.send(unwarnEmbed);
+            logChannel.send(unwarnEmbed);
 
             break;
+        case "8ball":
+            var answers = [
+                "Yes, ofc!",
+                "Ofc not.",
+                "Maybe 🤔",
+                "wE'lL nEvEr KnOw... 👐",
+                "Only if you say that Rancho Bot is best bot in <#598727852103565332>",
+                "Ask again later 🕒",
+                "What part of \"Ask again Later\" don't you understand??? 😒",
+                "Only if my nickname is `Rancho Bot // r!`",
+                "Not now, but maybe later.",
+                "Yes, but only for the time being.",
+                "ur mum gae LMAO roted!!!11!1!!!!funniiiiiiii!!!11!1!!!roasted-->rosted-->roted-->!!!11!!1!",
+                "Always.",
+                "Never!"
+            ]
+
+            if (!args[1]) return message.channel.send("Mate, I can't give an answer to nothing.");
+
+            const ballEmbed = new Discord.MessageEmbed()
+                .setTitle("Rancho Bot's Magic 8 Ball 🎱")
+                .addField("Question",)
+                .addField("Answer", (answers[Math.floor(Math.random() * answers.length)]))
+                .addField("Asked by", message.author)
+                .setColor("#603084")
+                .setThumbnail("https://static.thenounproject.com/png/124586-200.png")
+            message.channel.send(ballEmbed);
+            logChannel.send(ballEmbed);
+            break;
+        case "bal":
+            if (!args[1]) {
+                var userr = message.author;
+            } else {
+                var userr = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[1]))
+            }
+
+            if (userr = null) {
+                message.channel.send("bruh ur null")
+            }
+
+            userr = message.author;
+            if (money[userr.id] == null) {
+                money[userr.id] = {
+                    money: 500
+                }
+                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                    if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                });
+                message.reply("you have successfully been initialized into the currency system and given `500` coins.")
+            }
+
+            message.channel.send(`\`${bot.users.cache.get(userr.id).username}\` has $${money[userr.id].money}`)
+            break;
+        case "daily":
+            let timeout = 86400000;
+            let reward = 2000;
+
+            let dailyEmbed = new Discord.MessageEmbed()
+                .setTitle("Daily Coins")
+
+            if (!money[message.author.id]) {
+                money[message.author.id] = {
+                    name: bot.users.cache.get(message.author.id).tag,
+                    money: reward
+                }
+                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                    if (err) message.channel.send(`\`\`\`${err}\`\`\``);
+                });
+
+                if (!cooldowns[message.author.id]) {
+                    cooldowns[message.author.id] = {
+                        name: bot.users.cache.get(message.author.id).tag,
+                        daily: Date.now()
+                    }
+                    fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
+                        if (err) message.channel.send(`\`\`\`${err}\`\`\``);
+                    });
+                } else {
+                    cooldowns[message.author.id].daily = Date.now();
+                    fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
+                        if (err) message.channel.send(`\`\`\`${err}\`\`\``);
+                    });
+                }
+
+                return message.channel.send(dailyEmbed.setDescription(`You claimed your daily reward and recieved \`${reward}\` coins. You now have \`${money[message.author.id].money}\`.`)
+                    .setColor("RANDOM")
+                );
+            } else {
+                if (!cooldowns[message.author.id]) {
+                    cooldowns[message.author.id] = {
+                        name: bot.users.cache.get(message.author.id).tag,
+                        daily: Date.now()
+                    }
+                    fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
+                        if (err) message.channel.send(`\`\`\`${err}\`\`\``);
+                    });
+
+                    money[message.author.id].money += reward;
+                    fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
+                        if (err) message.channel.send(`\`\`\`${err}\`\`\``);
+                    });
+                    return message.channel.send(dailyEmbed.setDescription(`You claimed your daily reward and recieved \`${reward}\` coins. You now have \`${money[message.author.id].money}\`.`)
+                        .setColor("RANDOM")
+                    );
+                } else {
+                    if (timeout - (Date.now() - cooldowns[message.author.id].daily) > 0) {
+                        let timee = parsems(timeout - (Date.now() - cooldowns[message.author.id].daily));
+
+                        return message.channel.send(dailyEmbed
+                            .setColor("RANDOM")
+                            .setDescription("You already claimed your daily coins.")
+                            .addField("Claim in", `\`${timee.hours}h ${timee.minutes}m ${timee.seconds}s\``)
+                        );
+                    } else {
+                        money[message.author.id].money += reward;
+                        fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
+                            if (err) message.channel.send(`\`\`\`${err}\`\`\``);
+                        });
+                        cooldowns[message.author.id].daily = Date.now();
+                        fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
+                            if (err) message.channel.send(`\`\`\`${err}\`\`\``);
+                        });
+                        return message.channel.send(dailyEmbed.setDescription(`You claimed your daily reward and recieved \`${reward}\` coins. You now have \`${money[message.author.id].money}\`.`)
+                            .setColor("RANDOM")
+                        );
+                    }
+                }
+            }
+        case "bet":
+            var maxBet = 100000;
+
+            const betEmbed = new Discord.MessageEmbed()
+                .setTitle("Rancho Bot's Gambling Table 🎲")
+
+            if (!money[message.author.id] || money[message.author.id].money <= 0) return message.reply("dream on you don't have any money lmao!!1!11!1!!!11!");
+
+            if (!args[1]) return message.reply("tell me what to bet smh.");
+
+            if(args[1].toLowerCase() === "all") args[1] = money[message.author.id].money;
+
+            try {
+                var bet = parseFloat(args[1]);
+            } catch {
+                return message.reply("you can only bet numbers. Who skipped kindergarten math?");
+            }
+
+            if (bet != Math.floor(bet)) return message.reply("bet a whole number, not a decimal smh.");
+
+            if (money[message.author.id].money < bet) return message.reply("you don't even have enough money to cover your bet LMAO POOR");
+
+            if (bet > maxBet) return message.channel.send(`You can't bet more than \`${maxBet.toLocaleString()}\` coins.`)
+
+            let betOutcomes = ["win", "lose"]
+            var pick = betOutcomes[Math.floor(Math.random() * betOutcomes.length)];
+
+            if (pick === "lose") {
+                money[message.author.id].money -= bet;
+                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                    if (err) message.channel.send(`\`\`\`${err}\`\`\``);
+                });
+                betEmbed.setDescription(`\`${message.author}\` lost \`${bet}\` coins.`)
+                .setFooter(`You now have \`${money[message.author.id].money}\` coins.`)
+                .setColor("#8b0000")
+                return message.channel.send(betEmbed);
+            } else {
+                money[message.author.id].money += bet;
+                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                    if (err) message.channel.send(`\`\`\`${err}\`\`\``);
+                });
+                betEmbed.setDescription(`\`${message.author}\` won \`${bet}\` coins.`)
+                .setFooter(`You now have \`${money[message.author.id].money}\` coins.`)
+                .setColor("#32cd32")
+                return message.channel.send(betEmbed);
+            }
         case "confiemra":
             if (!args[1]) {
                 message.channel.send("smh choose someone to confiemra")
@@ -484,6 +682,7 @@ bot.on("message", message => {
             message.channel.send("(▀̿Ĺ̯▀̿ ̿)")
             break;
         case "gun":
+            message.member.roles.lowest
             message.channel.send("━╤デ╦︻(▀̿̿Ĺ̯̿̿▀̿ ̿)")
             break;
         case "middlefinger":
@@ -513,57 +712,6 @@ bot.on("message", message => {
         case "video":
             message.channel.send("<https://www.youtube.com/watch?v=dQw4w9WgXcQ>")
             break;
-        case "8ball":
-            var answers = [
-                "Yes, ofc!",
-                "Ofc not.",
-                "Maybe 🤔",
-                "wE'lL nEvEr KnOw... 👐",
-                "Only if you say that Rancho Bot is best bot in <#598727852103565332>",
-                "Ask again later 🕒",
-                "What part of \"Ask again Later\" don't you understand??? 😒",
-                "Only if my nickname is `Rancho Bot // r!`",
-                "Not now, but maybe later.",
-                "Yes, but only for the time being.",
-                "ur mum gae LMAO roted!!!11!1!!!!funniiiiiiii!!!11!1!!!roasted-->rosted-->roted-->!!!11!!1!",
-                "Always.",
-                "Never!"
-            ]
-
-            if (!args[1]) return message.channel.send("Mate, I can't give an answer to nothing.");
-
-            const ballEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Bot's Magic 8 Ball")
-                .addField("Question", args.slice(1).join(" "))
-                .addField("Answer", (answers[Math.floor(Math.random() * answers.length)]))
-                .addField("Asked by", message.author)
-                .setColor("#603084")
-                .setThumbnail("https://static.thenounproject.com/png/124586-200.png")
-            message.channel.send(ballEmbed);
-            break;
-        case "bal":
-            if (!args[0]) {
-                var userr = message.author;
-            } else {
-                var userr = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[0]))
-            }
-
-            if (userr = null) {
-                message.channel.send("bruh ur null")
-            }
-
-            userr = message.author;
-            if (money[userr.id] == null) {
-                money[userr.id] = {
-                    money: 500
-                }
-                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                    if (err) message.channel.send(`\`\`\`${err}\`\`\``)
-                });
-                message.reply("you have successfully been initialized into the currency system and given `500` coins.")
-            }
-
-            message.channel.send(`\`${bot.users.cache.get(userr.id).username}\` has $${money[userr.id].money}`)
     }
     if (message.content.includes("no u")) {
         message.react("663955085729988639");
