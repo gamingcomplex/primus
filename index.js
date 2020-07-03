@@ -10,7 +10,7 @@ const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XvpLxw.hmHLaGN6PIiGT_jK2qNqB0OOe4Y";
 
 const PREFIX = "r!";
 
-var version = "Official Release 1.1.5";
+var version = "Official Release 1.2.0";
 
 bot.on("ready", () => {
     bot.user.setActivity("r!help", { type: "PLAYING" })
@@ -74,7 +74,8 @@ bot.on("message", message => {
                 .addField("General", "`help`, `about`, `info`, `rules`")
                 .addField("Moderation", "`clear`, `kick`, `ban`, `mute`, `unmute`, `lock`, `unlock`, `warn`, `deletewarn`")
                 .addField("Lenny", "`lenny`, `tableflip`, `tableplace`, `cry`, `sunglasses`, `middlefinger`, `creepyshrug`, `wink`")
-                .addField("Fun", "`8ball`, `bal`")
+                .addField("Fun", "`8ball`")
+                .addField("Currency", "`bal`, `daily`, `bet`")
                 .setColor("#f93a2f")
                 .setDescription("To view any of the rules, type r! and what the rule is about (e.g. to view Rule 1 you would type r!nsfw")
                 .setFooter("The default prefix is: r!")
@@ -85,8 +86,9 @@ bot.on("message", message => {
             const aboutEmbed = new MessageEmbed()
                 .setTitle("About")
                 .addField("Version", version)
-                .addField("Creator/Developer", "The Gaming Complex#3879")
-                .addField("Beta Tester", "SansMLGDunker#6909")
+                .addField("Creator/Developer", "`The Gaming Complex#3879`")
+                .addField("Beta Tester", "`SansMLGDunker#6909`")
+                .addField("Special Thanks to", "`Milk#0628`, `Nekuskus(a♡)#6078`, `jemand2001#0666`")
                 .setColor("#0099e1")
                 .setThumbnail("https://cdn.discordapp.com/attachments/583074971916435478/720365830709313640/RanchoServerIcon.jpg")
 
@@ -536,7 +538,10 @@ bot.on("message", message => {
                 message.reply("you have successfully been initialized into the currency system and given `500` coins.")
             }
 
-            message.channel.send(`\`${bot.users.cache.get(userr.id).username}\` has $${money[userr.id].money}`)
+            const balEmbed = new Discord.MessageEmbed()
+                .setTitle(`${userr}'s Balance`)
+                .setDescription(`Wallet: \`${money[message.author.id].money}\`\nBank: bruh Oliver hasn't coded this yet`)
+                .setColor("RANDOM")
             break;
         case "daily":
             let timeout = 86400000;
@@ -623,7 +628,7 @@ bot.on("message", message => {
 
             if (!args[1]) return message.reply("tell me what to bet smh.");
 
-            if(args[1].toLowerCase() === "all") args[1] = money[message.author.id].money;
+            if (args[1].toLowerCase() === "all") args[1] = money[message.author.id].money;
 
             try {
                 var bet = parseFloat(args[1]);
@@ -646,8 +651,8 @@ bot.on("message", message => {
                     if (err) message.channel.send(`\`\`\`${err}\`\`\``);
                 });
                 betEmbed.setDescription(`\`${message.author}\` lost \`${bet}\` coins.`)
-                .setFooter(`You now have \`${money[message.author.id].money}\` coins.`)
-                .setColor("#8b0000")
+                    .setFooter(`You now have \`${money[message.author.id].money}\` coins.`)
+                    .setColor("#8b0000")
                 return message.channel.send(betEmbed);
             } else {
                 money[message.author.id].money += bet;
@@ -655,8 +660,8 @@ bot.on("message", message => {
                     if (err) message.channel.send(`\`\`\`${err}\`\`\``);
                 });
                 betEmbed.setDescription(`\`${message.author}\` won \`${bet}\` coins.`)
-                .setFooter(`You now have \`${money[message.author.id].money}\` coins.`)
-                .setColor("#32cd32")
+                    .setFooter(`You now have \`${money[message.author.id].money}\` coins.`)
+                    .setColor("#32cd32")
                 return message.channel.send(betEmbed);
             }
         case "confiemra":
