@@ -10,7 +10,7 @@ const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XvpLxw.hmHLaGN6PIiGT_jK2qNqB0OOe4Y";
 
 const PREFIX = "r!";
 
-var version = "Official Release 1.2.2";
+var version = "Official Release 1.2.3";
 
 bot.on("ready", () => {
     bot.user.setActivity("current blacklist: 703229714856411158", { type: "WATCHING" })
@@ -583,13 +583,13 @@ bot.on("message", message => {
 
             if (giveAmount != Math.floor(giveAmount)) return message.reply("give a whole number, not a decimal smh.");
 
-            if (money[message.author.id].money < bet) return message.reply("you don't even have enough money to give LMAO POOR");
-
             if (giveAmount < 1) return message.channel.send(`You can't give less than 1 coin wtf`)
+
+            if (!money[person.id]) return message.reply("this user is not yet initialized in the currency system.")
 
             if (!money[message.author.id]) return message.channel.send("you have no money to give LMAO!!1!!!1!11!!!rosted")
 
-            if (!money[person.id]) return message.reply("this user is not yet initialized in the currency system.")
+            if (money[message.author.id].money < giveAmount) return message.reply("you don't even have enough money to give LMAO POOR");
 
             money[person.id].money += parseInt(args[2]);
 
@@ -605,6 +605,7 @@ bot.on("message", message => {
                 .setFooter("Sharing is caring but I don't care")
                 .setColor("RANDOM")
             message.channel.send(giveEmbed);
+            break;
         case "daily":
             let timeout = 86400000;
             let reward = 2000;
@@ -755,7 +756,7 @@ bot.on("message", message => {
                         .setColor("RANDOM")
                     const workFailEmbed = new Discord.MessageEmbed()
                         .setTitle("Work Failed")
-                        .setDescription("You did not type the correct message in 5 tries or 10 seconds.")
+                        .setDescription("You did not type the correct message in 3 tries or 4 seconds.")
                         .setColor("RANDOM")
 
                     const workFilter = m => m.author.id === message.author.id;
@@ -902,6 +903,16 @@ bot.on("message", message => {
     }
     if (message.content.includes("kamran")) {
         message.react("🤮");
+    }
+    if (message.author.id === "546208503841292288" && message.content.includes("you just advanced to level")) {
+        money[message.mentions.users.first().id].money += 10000;
+        const levelUpEmbed = new Discord.MessageEmbed()
+            .setTitle("User Level Up! ⏫")
+            .setDescription(`Congrats for leveling up ${message.author}!\n\`10000\` coins were placed in your wallet.`)
+            .setFooter("Continue chatting and being active on the server for more level up rewards!")
+            .setThumbnail("https://image.flaticon.com/icons/svg/1469/1469840.svg")
+            .setColor("RANDOM")
+        message.channel.send(levelUpEmbed);
     }
 })
 
