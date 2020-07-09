@@ -13,10 +13,10 @@ const PREFIX = "r!";
 var version = "Official Release 1.2.0";
 
 bot.on("ready", () => {
-    bot.user.setActivity("r!help", { type: "PLAYING" })
+    bot.user.setActivity("current blacklist: 703229714856411158", { type: "WATCHING" })
     console.log("Bot has started!");
 })
-var blacklist = [];
+var blacklist = ["703229714856411158"];
 
 bot.on("message", message => {
     if (blacklist.includes(message.author.id)) return;
@@ -39,6 +39,7 @@ bot.on("message", message => {
     let warnTarget = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[1]))
     var blacklistMessage = ("Are you **__ABSOLUTELY__** sure that you want to blacklist this user? This will mean that I will no longer respond to any of their commands.")
     const logChannel = bot.channels.cache.get("704448219618345001");
+    const logChannel2 = bot.channels.cache.get("599401836167954433");
 
     switch (args[0]) {
         case "blacklist":
@@ -64,9 +65,7 @@ bot.on("message", message => {
                     })
             }
         case "ping":
-            if (!message.member.roles.cache.some(r => r.name === "Moderators")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
-
-            message.channel.send("pong!")
+            message.channel.send(`pong! Your ping is \`${Date.now() - message.createdTimestamp}\` ms.`)
             break;
         case "help":
             const helpEmbed = new Discord.MessageEmbed()
@@ -75,7 +74,7 @@ bot.on("message", message => {
                 .addField("Moderation", "`clear`, `kick`, `ban`, `mute`, `unmute`, `lock`, `unlock`, `warn`, `deletewarn`")
                 .addField("Lenny", "`lenny`, `tableflip`, `tableplace`, `cry`, `sunglasses`, `middlefinger`, `creepyshrug`, `wink`")
                 .addField("Fun", "`8ball`")
-                .addField("Currency", "`bal`, `daily`, `bet`")
+                .addField("Currency", "`bal`, `daily`, `bet`, `give`, `work`")
                 .setColor("#f93a2f")
                 .setDescription("To view any of the rules, type r! and what the rule is about (e.g. to view Rule 1 you would type r!nsfw")
                 .setFooter("The default prefix is: r!")
@@ -508,41 +507,104 @@ bot.on("message", message => {
 
             const ballEmbed = new Discord.MessageEmbed()
                 .setTitle("Rancho Bot's Magic 8 Ball 🎱")
-                .addField("Question",)
+                .addField("Question", args.slice(1).join(" "))
                 .addField("Answer", (answers[Math.floor(Math.random() * answers.length)]))
                 .addField("Asked by", message.author)
                 .setColor("#603084")
                 .setThumbnail("https://static.thenounproject.com/png/124586-200.png")
             message.channel.send(ballEmbed);
-            logChannel.send(ballEmbed);
+            logChannel2.send(ballEmbed);
             break;
-        case "bal":
+        case "ecoinit":
             if (!args[1]) {
-                var userr = message.author;
+                person = message.author;
             } else {
-                var userr = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[1]))
+                person = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[1]))
             }
 
-            if (userr = null) {
-                message.channel.send("bruh ur null")
-            }
+            const ecoinitEmbed = new Discord.MessageEmbed()
+                .setTitle("Operation Completed Successfully")
+                .addField("User", message.author)
+                .setFooter("Make sure to contact The Gaming Complex#3879 if any bugs/errors occur")
+                .setThumbnail("https://img.icons8.com/cotton/2x/economic-growth-.png")
+                .setColor("32cd32")
 
-            userr = message.author;
-            if (money[userr.id] == null) {
-                money[userr.id] = {
-                    money: 500
+            if (!money[person.id]) {
+                money[person.id] = {
+                    money: 500,
+                    job: "",
                 }
                 fs.writeFile("./money.json", JSON.stringify(money), (err) => {
                     if (err) message.channel.send(`\`\`\`${err}\`\`\``)
                 });
-                message.reply("you have successfully been initialized into the currency system and given `500` coins.")
+                message.channel.send(ecoinitEmbed
+                    .setDescription("you have successfully been initialized into the currency system and given `500` coins.")
+                )
+            }
+
+            if (!money[person.id].job) {
+                money[person.id].job = ""
+
+                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                    if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                });
+                message.channel.send(ecoinitEmbed
+                    .setDescription("you have been entered into the Rancho Bot jobs database.")
+                )
+            }
+            break;
+        case "bal":
+            if (!args[1]) {
+                person = message.author;
+            } else {
+                person = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[1]))
             }
 
             const balEmbed = new Discord.MessageEmbed()
-                .setTitle(`${userr}'s Balance`)
-                .setDescription(`Wallet: \`${money[message.author.id].money}\`\nBank: bruh Oliver hasn't coded this yet`)
+                .setTitle(`\`${person.tag}\`'s Balance`)
+                .setDescription(`Wallet: \`${money[message.author.id].money}\`\nBank: \`bruh Oliver hasn't coded this yet\``)
                 .setColor("RANDOM")
+            message.channel.send(balEmbed)
             break;
+        case "give":
+            var minGive = 1;
+
+            if (!args[1]) return message.reply("you need to give your money to someone dumbo.");
+
+            if (!person) return message.reply("I couldn't find that user.");
+
+            if (!args[2]) return message.reply("how much are you giving dumbo");
+
+            try {
+                var giveAmount = parseFloat(args[2]);
+            } catch {
+                return message.reply("you can only pay in numbers. Who skipped kindergarten math?");
+            }
+
+            if (giveAmount != Math.floor(giveAmount)) return message.reply("give a whole number, not a decimal smh.");
+
+            if (money[message.author.id].money < bet) return message.reply("you don't even have enough money to give LMAO POOR");
+
+            if (giveAmount < 1) return message.channel.send(`You can't give less than 1 coin wtf`)
+
+            if (!money[message.author.id]) return message.channel.send("you have no money to give LMAO!!1!!!1!11!!!rosted")
+
+            if (!money[person.id]) return message.reply("this user is not yet initialized in the currency system.")
+
+            money[person.id].money += parseInt(args[2]);
+
+            money[message.author.id].money -= parseInt(args[2]);
+
+            fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                if (err) message.channel.send(`\`\`\`${err}\`\`\``);
+            });
+
+            const giveEmbed = new Discord.MessageEmbed()
+                .setTitle("Transaction Completed Successfully")
+                .setDescription(`\`${message.author.tag}\` gave \`${giveAmount}\` coins to \`${person.tag}\`.`)
+                .setFooter("Sharing is caring but I don't care")
+                .setColor("RANDOM")
+            message.channel.send(giveEmbed);
         case "daily":
             let timeout = 86400000;
             let reward = 2000;
@@ -659,11 +721,119 @@ bot.on("message", message => {
                 fs.writeFile("./money.json", JSON.stringify(money), (err) => {
                     if (err) message.channel.send(`\`\`\`${err}\`\`\``);
                 });
-                betEmbed.setDescription(`\`${message.author}\` won \`${bet}\` coins.`)
+                betEmbed.setDescription(`\`${message.author.tag}\` won \`${bet}\` coins.`)
                     .setFooter(`You now have \`${money[message.author.id].money}\` coins.`)
                     .setColor("#32cd32")
                 return message.channel.send(betEmbed);
             }
+        case "work":
+            //list of jobs
+            const careers = [
+                "Gas Station Clerk"
+            ]
+
+            if (!args[1]) {
+
+                if (!money[message.author.id].job) {
+                    //if user has no job
+                    const noWorkEmbed = new Discord.MessageEmbed()
+                        .setTitle("Command Failed")
+                        .setDescription("You don't currently have a job to work at.")
+                        .setFooter("Type r!work <job name here> to apply for that job.")
+                    message.channel.send(noWorkEmbed);
+                } else {
+                    //job minigames here
+                    var salary;
+
+                    const workEmbed = new Discord.MessageEmbed()
+                        .setTitle(`Work for ${money[message.author.id].job}`)
+                        .setThumbnail("https://img.favpng.com/8/3/11/office-icon-work-icon-png-favpng-0XRkELhR9NkkM5xVrh6bRrsz5.jpg")
+                        .setColor("RANDOM")
+                    const workFinEmbed = new Discord.MessageEmbed()
+                        .setTitle("Successfully Finished Work")
+                        .setThumbnail("https://imageog.flaticon.com/icons/png/512/1019/1019607.png?size=1200x630f&pad=10,10,10,10&ext=png&bg=FFFFFFFF")
+                        .setColor("RANDOM")
+                    const workFailEmbed = new Discord.MessageEmbed()
+                        .setTitle("Work Failed")
+                        .setDescription("You did not type the correct message in 5 tries or 10 seconds.")
+                        .setColor("RANDOM")
+
+                    const workFilter = m => m.author.id === message.author.id;
+
+                    switch (money[message.author.id].job) {
+                        case "Oliver":
+                            const salary = 10000;
+
+                            message.channel.send(workEmbed
+                                .setDescription("What is the 690th line of code for this bot?")
+                            ).then(() => {
+                                message.channel.awaitMessages(workFilter, {
+                                    max: 5,
+                                    time: 10000
+                                }).then(collected => {
+                                    if (collected.first().content === "if (err) message.channel.send(err);") {
+                                        money[message.author.id].money += salary;
+                                        message.channel.send(workFinEmbed
+                                            .setDescription(`You earned ${salary} coins at work for ${money[message.author.id].job} today.`)
+                                        );
+                                    }
+                                }).catch(collected => {
+                                    message.channel.send(workFailEmbed);
+                                });
+                            })
+                        case "Gas Station Clerk":
+                            const salary = 500;
+
+                            message.channel.send(workEmbed
+                                .setDescription("🏪 ⛽ 🏎️\nPump the gas for the customer! Type `pump`.")
+                            ).then(() => {
+                                message.channel.awaitMessages(workFilter, {
+                                    max: 5,
+                                    time: 10000
+                                }).then(collected => {
+                                    if (collected.first().content === "pump") {
+                                        money[message.author.id].money += salary;
+                                        message.channel.send(workFinEmbed
+                                            .setDescription(`You earned ${salary} coins at work for ${money[message.author.id].job} today.`)
+                                        );
+                                    }
+                                }).catch(collected => {
+                                    message.channel.send(workFailEmbed);
+                                });
+                            });
+
+                    }
+
+                    //🟦⬜
+                    if (args[1] === "careers") {
+                        //job listings
+                        const careersEmbed = new Discord.MessageEmbed()
+                            .setTitle("Available Job Listings 👨‍💼")
+                            .setFooter("Type r!work <job name here> to apply for that job.")
+                            .setColor("RANDOM")
+                            .addField("🟦  Gas Station Clerk", "`500` coins/hr")
+                    } else {
+                        if (careers.includes(args[1])) {
+
+                            //save job in money.json
+                            money[message.author.id].job = args[1];
+                            fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                                if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                            });
+
+                            //if user started a job
+                            const jobStart = new Discord.MessageEmbed()
+                                .setTitle("Job Accepted")
+                                .setDescription(`\`${message.author.tag}\` has started working as a \`${args[1]}\`.`)
+                                .setFooter("Use r!work to earn money at your job")
+                                .setThumbnail("https://img.favpng.com/8/3/11/office-icon-work-icon-png-favpng-0XRkELhR9NkkM5xVrh6bRrsz5.jpg")
+                                .setColor("RANDOM")
+                            message.channel.send(jobStart);
+                        }
+                    }
+                }
+            }
+            break;
         case "confiemra":
             if (!args[1]) {
                 message.channel.send("smh choose someone to confiemra")
