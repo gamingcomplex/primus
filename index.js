@@ -10,7 +10,7 @@ const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XvpLxw.hmHLaGN6PIiGT_jK2qNqB0OOe4Y";
 
 const PREFIX = "r!";
 
-var version = "Official Release 1.2.0";
+var version = "Official Release 1.2.2";
 
 bot.on("ready", () => {
     bot.user.setActivity("current blacklist: 703229714856411158", { type: "WATCHING" })
@@ -636,7 +636,7 @@ bot.on("message", message => {
                     });
                 }
 
-                return message.channel.send(dailyEmbed.setDescription(`You claimed your daily reward and recieved \`${reward}\` coins. You now have \`${money[message.author.id].money}\`.`)
+                return message.channel.send(dailyEmbed.setDescription(`You claimed your daily reward and recieved \`${reward}\` coins. You now have \`${money[message.author.id].money}\` coins.`)
                     .setColor("RANDOM")
                 );
             } else {
@@ -653,7 +653,7 @@ bot.on("message", message => {
                     fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
                         if (err) message.channel.send(`\`\`\`${err}\`\`\``);
                     });
-                    return message.channel.send(dailyEmbed.setDescription(`You claimed your daily reward and recieved \`${reward}\` coins. You now have \`${money[message.author.id].money}\`.`)
+                    return message.channel.send(dailyEmbed.setDescription(`You claimed your daily reward and recieved \`${reward}\` coins. You now have \`${money[message.author.id].money}\` coins.`)
                         .setColor("RANDOM")
                     );
                 } else {
@@ -674,7 +674,7 @@ bot.on("message", message => {
                         fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
                             if (err) message.channel.send(`\`\`\`${err}\`\`\``);
                         });
-                        return message.channel.send(dailyEmbed.setDescription(`You claimed your daily reward and recieved \`${reward}\` coins. You now have \`${money[message.author.id].money}\`.`)
+                        return message.channel.send(dailyEmbed.setDescription(`You claimed your daily reward and recieved \`${reward}\` coins. You now have \`${money[message.author.id].money}\` coins.`)
                             .setColor("RANDOM")
                         );
                     }
@@ -712,8 +712,8 @@ bot.on("message", message => {
                 fs.writeFile("./money.json", JSON.stringify(money), (err) => {
                     if (err) message.channel.send(`\`\`\`${err}\`\`\``);
                 });
-                betEmbed.setDescription(`\`${message.author}\` lost \`${bet}\` coins.`)
-                    .setFooter(`You now have \`${money[message.author.id].money}\` coins.`)
+                betEmbed.setDescription(`\`${message.author.tag}\` lost \`${bet}\` coins.`)
+                    .setFooter(`You now have ${money[message.author.id].money} coins.`)
                     .setColor("#8b0000")
                 return message.channel.send(betEmbed);
             } else {
@@ -722,7 +722,7 @@ bot.on("message", message => {
                     if (err) message.channel.send(`\`\`\`${err}\`\`\``);
                 });
                 betEmbed.setDescription(`\`${message.author.tag}\` won \`${bet}\` coins.`)
-                    .setFooter(`You now have \`${money[message.author.id].money}\` coins.`)
+                    .setFooter(`You now have ${money[message.author.id].money} coins.`)
                     .setColor("#32cd32")
                 return message.channel.send(betEmbed);
             }
@@ -772,12 +772,13 @@ bot.on("message", message => {
                                     time: 10000
                                 }).then(collected => {
                                     if (collected.first().content === "if (err) message.channel.send(err);") {
+                                        message.channel.bulkDelete(1);
                                         money[message.author.id].money += salary;
                                         fs.writeFile("./money.json", JSON.stringify(money), (err) => {
                                             if (err) message.channel.send(`\`\`\`${err}\`\`\``)
                                         });
                                         message.channel.send(workFinEmbed
-                                            .setDescription(`You earned ${salary} coins at work for ${money[message.author.id].job} today.`)
+                                            .setDescription(`\`${message.author.tag}\` earned ${salary} coins at work for ${money[message.author.id].job} today.`)
                                         );
                                     }
                                 }).catch(collected => {
@@ -792,7 +793,7 @@ bot.on("message", message => {
                             ).then(() => {
                                 message.channel.awaitMessages(workFilter, {
                                     max: 5,
-                                    time: 10000
+                                    time: 4000
                                 }).then(collected => {
                                     if (collected.first().content === "pump") {
                                         money[message.author.id].money += gscsalary;
@@ -800,7 +801,7 @@ bot.on("message", message => {
                                             if (err) message.channel.send(`\`\`\`${err}\`\`\``)
                                         });
                                         message.channel.send(workFinEmbed
-                                            .setDescription(`You earned ${gscsalary} coins at work for ${money[message.author.id].job} today.`)
+                                            .setDescription(`\`${message.author.tag}\` earned ${gscsalary} coins at work for ${money[message.author.id].job} today.`)
                                         );
                                     }
                                 }).catch(collected => {
