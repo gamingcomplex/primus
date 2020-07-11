@@ -1,5 +1,6 @@
 const Discord = require("discord.js"); const { Client, Attachment, MessageEmbed } = require("discord.js");
 const bot = new Discord.Client();
+const wait = require("util").promisify(setTimeout);
 const ms = require("ms");
 const fs = require("fs");
 const parsems = require("parse-ms")
@@ -10,7 +11,7 @@ const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XvpLxw.hmHLaGN6PIiGT_jK2qNqB0OOe4Y";
 
 const PREFIX = "r!";
 
-var version = "Official Release 1.2.3";
+var version = "Official Release 1.2.4";
 
 bot.on("ready", () => {
     bot.user.setActivity("current blacklist: 703229714856411158", { type: "WATCHING" })
@@ -116,7 +117,6 @@ bot.on("message", message => {
                 message.channel.send(userEmbed);
             }
             break;
-
         case "rules":
             const rulesEmbed = new Discord.MessageEmbed()
                 .setTitle("Rancho Middle School Server Rules")
@@ -730,7 +730,8 @@ bot.on("message", message => {
         case "work":
             //list of jobs
             const careers = [
-                "Gas_Station_Clerk"
+                "Gas_Station_Clerk",
+                "Grocery_Store_Cashier"
             ]
 
             if (!args[1]) {
@@ -756,7 +757,7 @@ bot.on("message", message => {
                         .setColor("RANDOM")
                     const workFailEmbed = new Discord.MessageEmbed()
                         .setTitle("Work Failed")
-                        .setDescription("You did not type the correct message in 3 tries or 4 seconds.")
+                        .setDescription("You did not type the correct message in the allowed time frame.")
                         .setColor("RANDOM")
 
                     const workFilter = m => m.author.id === message.author.id;
@@ -769,7 +770,7 @@ bot.on("message", message => {
                                 .setDescription("What is the 690th line of code for this bot?")
                             ).then(() => {
                                 message.channel.awaitMessages(workFilter, {
-                                    max: 5,
+                                    max: 1,
                                     time: 10000
                                 }).then(collected => {
                                     if (collected.first().content === "if (err) message.channel.send(err);") {
@@ -786,14 +787,16 @@ bot.on("message", message => {
                                     message.channel.send(workFailEmbed);
                                 });
                             })
+                            break;
                         case "Gas_Station_Clerk":
                             const gscsalary = 500;
 
+                            message.channel.send(`🏪 ⛽ 🏎️`)
                             message.channel.send(workEmbed
-                                .setDescription("🏪 ⛽ 🏎️\nPump the gas for the customer! Type `pump`.")
+                                .setDescription("Pump the gas for the customer! Type `pump`.")
                             ).then(() => {
                                 message.channel.awaitMessages(workFilter, {
-                                    max: 5,
+                                    max: 1,
                                     time: 4000
                                 }).then(collected => {
                                     if (collected.first().content === "pump") {
@@ -809,6 +812,57 @@ bot.on("message", message => {
                                     message.channel.send(workFailEmbed);
                                 });
                             });
+                            break;
+                        case "Grocery_Store_Cashier":
+                            function reverseString(s) {
+                                return s.split("").reverse().join("")
+                            }
+
+                            const gscashsalary = 800;
+                            const groceryItems = [
+                                "🍎",
+                                "🍊",
+                                "🍇",
+                                "🍓",
+                                "🍒",
+                                "🍑",
+                                "🍍",
+                                "🍅",
+                                "🍆",
+                                "🥦",
+                                "🥬",
+                                "🌽",
+                                "🧅",
+                                "🧄",
+                                "🥔",
+                                "🍞"
+                            ]
+                            let cashierItem1 = groceryItems[Math.floor(Math.random() * groceryItems.length)]
+                            let cashierItem2 = groceryItems[Math.floor(Math.random() * groceryItems.length)]
+                            let cashierItem3 = groceryItems[Math.floor(Math.random() * groceryItems.length)]
+                            let cashierItems = `${cashierItem1} ${cashierItem2} ${cashierItem3}`;
+
+                            message.channel.send(`🛒 ${cashierItems} 🖥️`)
+                            message.channel.send(workEmbed
+                                .setDescription("Type the produce emojis in the order they come to the register!")
+                            ).then(() => {
+                                message.channel.awaitMessages(workFilter, {
+                                    max: 1,
+                                    time: 10000
+                                }).then(collected => {
+                                    if (collected.first().content === (`${cashierItem3} ${cashierItem2} ${cashierItem1}`)) {
+                                        money[message.author.id].money += gscashsalary;
+                                        fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                                            if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                                        });
+                                        message.channel.send(workFinEmbed
+                                            .setDescription(`\`${message.author.tag}\` earned ${gscashsalary} coins at work for ${money[message.author.id].job} today.`)
+                                        );
+                                    }
+                                }).catch(collected => {
+                                    message.channel.send(workFailEmbed);
+                                });
+                            })
                     }
                 }
             }
@@ -820,6 +874,7 @@ bot.on("message", message => {
                     .setFooter("Type r!work <job name here> to apply for that job.")
                     .setColor("RANDOM")
                     .addField("🟦  Gas_Station_Clerk", "`500` coins/hr")
+                    .addField("🟦  Grocery Store Cashier", "`800` coins/hr")
                 message.channel.send(careersEmbed);
             } else {
                 if (careers.includes(args[1])) {
@@ -904,11 +959,18 @@ bot.on("message", message => {
     if (message.content.includes("kamran")) {
         message.react("🤮");
     }
-    if (message.author.id === "546208503841292288" && message.content.includes("you just advanced to level")) {
-        money[message.mentions.users.first().id].money += 10000;
+    if (message.author.id === "159985870458322944" && message.content.includes("you just advanced to level")) {
+
+        let levelUpTarget = message.mentions.users.first;
+        if (!money[levelUpTarget.id]) return message.channel.send(`Level up reward failed; \`${levelUpTarget.tag}\` has not been initialized into the currency system.`)
+
+        money[levelUpTarget.id].money += 10000;
+        fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+            if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+        });
         const levelUpEmbed = new Discord.MessageEmbed()
             .setTitle("User Level Up! ⏫")
-            .setDescription(`Congrats for leveling up ${message.author}!\n\`10000\` coins were placed in your wallet.`)
+            .setDescription(`Congrats for leveling up ${levelUpTarget.tag}!\n\`10000\` coins were placed in your wallet.`)
             .setFooter("Continue chatting and being active on the server for more level up rewards!")
             .setThumbnail("https://image.flaticon.com/icons/svg/1469/1469840.svg")
             .setColor("RANDOM")
