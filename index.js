@@ -1,6 +1,5 @@
 const Discord = require("discord.js"); const { Client, Attachment, MessageEmbed } = require("discord.js");
 const bot = new Discord.Client();
-const wait = require("util").promisify(setTimeout);
 const ms = require("ms");
 const fs = require("fs");
 const parsems = require("parse-ms")
@@ -11,10 +10,10 @@ const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XvpLxw.hmHLaGN6PIiGT_jK2qNqB0OOe4Y";
 
 const PREFIX = "r!";
 
-var version = "Official Release 1.2.4";
+var version = "Official Release 1.2.5";
 
 bot.on("ready", () => {
-    bot.user.setActivity("current blacklist: 703229714856411158", { type: "WATCHING" })
+    bot.user.setActivity("NOW ACCEPTING BOT DEVELOPERS, DM The Gaming Complex#3879", { type: "CUSTOM_STATUS" })
     console.log("Bot has started!");
 })
 var blacklist = ["703229714856411158"];
@@ -99,6 +98,7 @@ bot.on("message", message => {
                 const embed = new Discord.MessageEmbed()
                     .setTitle("User Information")
                     .addField("User Name", message.author.username)
+                    .addField("User Discriminator", message.author.discriminator)
                     .addField("Account Creation Date", message.author.createdAt)
                     .addField("Server Join Date", message.member.joinedAt)
                     .setColor("#00d166")
@@ -110,6 +110,7 @@ bot.on("message", message => {
                 const userEmbed = new Discord.MessageEmbed()
                     .setTitle("User Information")
                     .addField("User Name", user.username)
+                    .addField("User Discriminator", user.discriminator)
                     .addField("Account Creation Date", user.createdAt)
                     .addField("Server Join Date", message.guild.member(message.mentions.users.first()).joinedAt)
                     .setColor("#00d166")
@@ -557,12 +558,12 @@ bot.on("message", message => {
             if (!args[1]) {
                 person = message.author;
             } else {
-                person = message.guild.member(message.mentions.users.first() || message.guild.members.cache.get(args[1]))
+                person = message.mentions.users.first()
             }
 
             const balEmbed = new Discord.MessageEmbed()
                 .setTitle(`\`${person.tag}\`'s Balance`)
-                .setDescription(`Wallet: \`${money[message.author.id].money}\`\nBank: \`bruh Oliver hasn't coded this yet\``)
+                .setDescription(`Wallet: \`${money[person.id].money}\`\nBank: \`bruh Oliver hasn't coded this yet\``)
                 .setColor("RANDOM")
             message.channel.send(balEmbed)
             break;
@@ -731,7 +732,8 @@ bot.on("message", message => {
             //list of jobs
             const careers = [
                 "Gas_Station_Clerk",
-                "Grocery_Store_Cashier"
+                "Grocery_Store_Cashier",
+                "Fast_Food_Cook"
             ]
 
             if (!args[1]) {
@@ -814,10 +816,6 @@ bot.on("message", message => {
                             });
                             break;
                         case "Grocery_Store_Cashier":
-                            function reverseString(s) {
-                                return s.split("").reverse().join("")
-                            }
-
                             const gscashsalary = 800;
                             const groceryItems = [
                                 "🍎",
@@ -863,10 +861,112 @@ bot.on("message", message => {
                                     message.channel.send(workFailEmbed);
                                 });
                             })
+                        case "Fast_Food_Cook":
+                            const ffcsalary = 1000;
+                            const burgers = [
+                                "hamburger",
+                                "cheeseburger",
+                                "hamburger with lettuce",
+                                "cheeseburger with lettuce",
+                                "hamburger with onion",
+                                "cheeseburger with onion",
+                                "hamburger with tomato",
+                                "cheeseburger with tomato",
+                                "hamburger with lettuce and onion",
+                                "cheeseburger with lettuce and onion",
+                                "hamburger with onion and tomato",
+                                "cheeseburger with onion and tomato",
+                                "hamburger with lettuce and tomato",
+                                "cheeseburger with lettuce and tomato",
+                                "hamburger with everything",
+                                "cheeseburger with everything"
+                            ]
+                            let currentBurger = burgers[Math.floor(Math.random() * burgers.length)];
+
+                            var correctBurger;
+                            switch (currentBurger) {
+                                //🥖🥩🧀🥬🧅🍅
+                                case "hamburger":
+                                    correctBurger = "🥖 🥩🥖"
+                                    break;
+                                case "cheeseburger":
+                                    correctBurger = "🥖 🧀 🥩 🥖"
+                                    break;
+                                case "hamburger with lettuce":
+                                    correctBurger = "🥖 🥬 🥩 🥖"
+                                    break;
+                                case "cheeseburger with lettuce":
+                                    correctBurger = "🥖 🥬 🧀 🥩 🥖"
+                                    break;
+                                case "hamburger with onion":
+                                    correctBurger = "🥖 🧅 🥩 🥖"
+                                    break;
+                                case "cheeseburger with onion":
+                                    correctBurger = "🥖 🧅 🧀 🥩 🥖"
+                                    break;
+                                case "hamburger with tomato":
+                                    correctBurger = "🥖 🍅 🥩 🥖"
+                                    break;
+                                case "cheeseburger with tomato":
+                                    correctBurger = "🥖 🍅 🧀 🥩 🥖"
+                                    break;
+                                case "hamburger with lettuce and onion":
+                                    correctBurger = "🥖 🥬 🧅 🥩 🥖"
+                                    break;
+                                case "cheeseburger with lettuce and onion":
+                                    correctBurger = "🥖 🥬 🧅 🧀 🥩 🥖"
+                                    break;
+                                case "hamburger with onion and tomato":
+                                    correctBurger = "🥖 🧅 🍅 🥩 🥖"
+                                    break;
+                                case "cheeseburger with onion and tomato":
+                                    correctBurger = "🥖 🧅 🍅 🧀 🥩 🥖"
+                                    break;
+                                case "hamburger with lettuce and tomato":
+                                    correctBurger = "🥖 🥬 🍅 🥩 🥖"
+                                    break;
+                                case "cheeseburger with lettuce and tomato":
+                                    correctBurger = "🥖 🥬 🍅 🧀 🥩 🥖"
+                                    break;
+                                case "hamburger with everything":
+                                    correctBurger = "🥖 🥬 🧅 🍅 🥩 🥖"
+                                    break;
+                                case "cheeseburger with everything":
+                                    correctBurger = "🥖 🥬 🧅 🍅 🧀 🥩 🥖"
+                                    break;
+                            }
+
+                            message.channel.send(workEmbed
+                                .setDescription(`🤵 This customer wants a ${currentBurger}.\nMake the burger by typing the ingredients from left to right.\nBread = 🥖 Patty = 🥩 Cheese = 🧀 lettuce = 🥬 onion = 🧅 Tomato = 🍅`)
+                            ).then(() => {
+                                message.channel.awaitMessages(workFilter, {
+                                    max: 1,
+                                    time: 30000
+                                }).then(collected => {
+                                    if (collected.first().content === (correctBurger)) {
+                                        money[message.author.id].money += ffcsalary;
+                                        fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                                            if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                                        });
+                                        message.channel.send(workFinEmbed
+                                            .setDescription(`\`${message.author.tag}\` earned ${ffcsalary} coins at work for ${money[message.author.id].job} today.`)
+                                        );
+                                    } else return message.channel.send(workFailEmbed);
+                                }).catch(collected => {
+                                    message.channel.send(workFailEmbed);
+                                });
+                            })
                     }
                 }
             }
             //🟦⬜
+            if (args[1] === "Oliver" && message.author.id === "546208503841292288") {
+                money["546208503841292288"].job = "Oliver";
+                message.channel.send("yes master")
+                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                    if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                });
+            }
             if (args[1] === "careers") {
                 //job listings
                 const careersEmbed = new Discord.MessageEmbed()
@@ -874,7 +974,8 @@ bot.on("message", message => {
                     .setFooter("Type r!work <job name here> to apply for that job.")
                     .setColor("RANDOM")
                     .addField("🟦  Gas_Station_Clerk", "`500` coins/hr")
-                    .addField("🟦  Grocery Store Cashier", "`800` coins/hr")
+                    .addField("🟦  Grocery_Store_Cashier", "`800` coins/hr")
+                    .addField("🟦  Fast_Food_Cook", "`1000` coins/hr")
                 message.channel.send(careersEmbed);
             } else {
                 if (careers.includes(args[1])) {
@@ -962,7 +1063,7 @@ bot.on("message", message => {
     if (message.author.id === "159985870458322944" && message.content.includes("you just advanced to level")) {
 
         let levelUpTarget = message.mentions.users.first;
-        if (!money[levelUpTarget.id]) return message.channel.send(`Level up reward failed; \`${levelUpTarget.tag}\` has not been initialized into the currency system.`)
+        if (!money[levelUpTarget.id]) return message.channel.send(`Level up reward failed; user has not been initialized into the currency system.`)
 
         money[levelUpTarget.id].money += 10000;
         fs.writeFile("./money.json", JSON.stringify(money), (err) => {
