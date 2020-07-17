@@ -4,16 +4,17 @@ const ms = require("ms");
 const fs = require("fs");
 const parsems = require("parse-ms")
 const money = require("./money.json")
-const cooldowns = require("./cooldowns.json")
+const cooldowns = require("./cooldowns.json");
+const { monitorEventLoopDelay } = require("perf_hooks");
 
 const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XvpLxw.hmHLaGN6PIiGT_jK2qNqB0OOe4Y";
 
 const PREFIX = "r!";
 
-var version = "Official Release 1.2.5";
+var version = "Official Release 1.2.6";
 
 bot.on("ready", () => {
-    bot.user.setActivity("NOW ACCEPTING BOT DEVELOPERS, DM The Gaming Complex#3879", { type: "CUSTOM_STATUS" })
+    bot.user.setActivity("NOW ACCEPTING BOT DEVELOPERS, DM The Gaming Complex#3879", { type: "WATCHING" })
     console.log("Bot has started!");
 })
 var blacklist = ["703229714856411158"];
@@ -553,6 +554,17 @@ bot.on("message", message => {
                     .setDescription("you have been entered into the Rancho Bot jobs database.")
                 )
             }
+
+            if (!money[person.id].jobHours) {
+                money[person.id].jobHours = "0"
+
+                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                    if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                });
+                message.channel.send(ecoinitEmbed
+                    .setDescription("you have been entered into the Rancho Bot jobs database.")
+                )
+            }
             break;
         case "bal":
             if (!args[1]) {
@@ -602,7 +614,7 @@ bot.on("message", message => {
 
             const giveEmbed = new Discord.MessageEmbed()
                 .setTitle("Transaction Completed Successfully")
-                .setDescription(`\`${message.author.tag}\` gave \`${giveAmount}\` coins to \`${person.tag}\`.`)
+                .setDescription(`\`${message.author.tag}\` gave \`${giveAmount}\` coins.`)
                 .setFooter("Sharing is caring but I don't care")
                 .setColor("RANDOM")
             message.channel.send(giveEmbed);
@@ -733,7 +745,8 @@ bot.on("message", message => {
             const careers = [
                 "Gas_Station_Clerk",
                 "Grocery_Store_Cashier",
-                "Fast_Food_Cook"
+                "Fast_Food_Cook",
+                "Lawyer"
             ]
 
             if (!args[1]) {
@@ -766,7 +779,7 @@ bot.on("message", message => {
 
                     switch (money[message.author.id].job) {
                         case "Oliver":
-                            const salary = 10000;
+                            const salary = 100000;
 
                             message.channel.send(workEmbed
                                 .setDescription("What is the 690th line of code for this bot?")
@@ -809,7 +822,7 @@ bot.on("message", message => {
                                         message.channel.send(workFinEmbed
                                             .setDescription(`\`${message.author.tag}\` earned ${gscsalary} coins at work for ${money[message.author.id].job} today.`)
                                         );
-                                    }
+                                    } else return message.channel.send(workFailEmbed);
                                 }).catch(collected => {
                                     message.channel.send(workFailEmbed);
                                 });
@@ -856,7 +869,7 @@ bot.on("message", message => {
                                         message.channel.send(workFinEmbed
                                             .setDescription(`\`${message.author.tag}\` earned ${gscashsalary} coins at work for ${money[message.author.id].job} today.`)
                                         );
-                                    }
+                                    } else return message.channel.send(workFailEmbed);
                                 }).catch(collected => {
                                     message.channel.send(workFailEmbed);
                                 });
@@ -956,6 +969,55 @@ bot.on("message", message => {
                                     message.channel.send(workFailEmbed);
                                 });
                             })
+                        case "Lawyer":
+                            let courtOptions = [
+                                "guilty",
+                                "not guilty",
+                                "objection",
+                                "witness",
+                                "relavance"
+                            ]
+                            let currentCourt = courtOptions[Math.floor(Math.random() * courtOptions.length)];
+
+                            var correctCourt;
+                            switch(currentCourt) {
+                                case "guilty":
+                                    correctCourt = "I hereby find the defendant guilty"
+                                    break;
+                                case "not guilty":
+                                    correctCourt = "I hereby find the defendant not guilty"
+                                    break;
+                                case "objection":
+                                    correctCourt = "Objection, your Honor"
+                                    break;
+                                case "witness":
+                                    correctCourt = "I hereby call the witness to the stand"
+                                    break;
+                                case "relavance":
+                                    correctCourt = "Objection, relavance?"
+                                    break;
+                            }
+
+                            message.channel.send(workEmbed
+                                .setDescription(`The jury has decided! Call a(n) ${currentCourt}`)
+                            ).then(() => {
+                                message.channel.awaitMessages(workFilter, {
+                                    max: 1,
+                                    time: 12000
+                                }).then(collected => {
+                                    if (collected.first().content === (correctCourt)) {
+                                        money[message.author.id].jobHours += 1;
+                                        fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                                            if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                                        });
+                                        message.channel.send(workFinEmbed
+                                            .setDescription("One hour of work was added to your paycheck.")
+                                        );
+                                    } else return message.channel.send(workFailEmbed);
+                                }).catch(collected => {
+                                    message.channel.send(workFailEmbed);
+                                });
+                            })
                     }
                 }
             }
@@ -967,18 +1029,64 @@ bot.on("message", message => {
                     if (err) message.channel.send(`\`\`\`${err}\`\`\``)
                 });
             }
+            if (args[1] === "paycheck") {
+                if (!money[message.author.id].jobHours) return message.channel.send("lmao you're not even fully initialized into the currency system. Use ")
+
+                if (money[message.author.id].jobHours < 20) return message.channel.send(`You can't claim your paycheck yet. You still need to work for \`${20 - money[message.author.id].jobHours}\` hours.`)
+
+                var wage;
+
+                switch(money[message.author.id].job) {
+                    case "Lawyer":
+                        wage = 5000;
+                }
+                money[message.author.id].money += (wage * 20);
+
+                const paycheckEmbed = new Discord.MessageEmbed()
+                    .setTitle("Paycheck Recieved")
+                    .setDescription(`You claimed your paycheck and recieved \`${wage * money[message.author.id].jobHours}\` coins.`)
+                    .addField("Job", money[message.author.id].job)
+                    .addField("Hours Worked", money[message.author.id].jobHours)
+                    .setThumbnail("https://cdn0.iconfinder.com/data/icons/jumpicon-financial-line-1/32/-_Paycheck-Salary-Envelope-Money-512.png")
+                    .setColor("RANDOM")
+                message.channel.send(paycheckEmbed);
+
+                money[message.author.id].jobHours = 0;
+                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                    if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                });
+            }
             if (args[1] === "careers") {
                 //job listings
                 const careersEmbed = new Discord.MessageEmbed()
-                    .setTitle("Available Job Listings 👨‍💼")
+                    .setTitle("Available Job Listings  👨‍💼")
                     .setFooter("Type r!work <job name here> to apply for that job.")
                     .setColor("RANDOM")
                     .addField("🟦  Gas_Station_Clerk", "`500` coins/hr")
                     .addField("🟦  Grocery_Store_Cashier", "`800` coins/hr")
                     .addField("🟦  Fast_Food_Cook", "`1000` coins/hr")
+                    .addField("⬜  Lawyer", "`100000` coin paycheck")
                 message.channel.send(careersEmbed);
             } else {
-                if (careers.includes(args[1])) {
+                if (careers.includes(args[1]) && args[1].startsWith("🟦")) {
+
+                    //save job in money.json
+                    money[message.author.id].job = args[1];
+                    fs.writeFile("./money.json", JSON.stringify(money), (err) => {
+                        if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                    });
+
+                    //if user started a job
+                    const jobStart = new Discord.MessageEmbed()
+                        .setTitle("Job Accepted")
+                        .setDescription(`\`${message.author.tag}\` has started working as a \`${args[1]}\`.`)
+                        .setFooter("Use r!work to earn money at your job")
+                        .setThumbnail("https://img.favpng.com/8/3/11/office-icon-work-icon-png-favpng-0XRkELhR9NkkM5xVrh6bRrsz5.jpg")
+                        .setColor("RANDOM")
+                    message.channel.send(jobStart);
+                }
+                if (careers.includes(args[1]) && args[1].startsWith("⬜")) {
+                    if (!money[message.author.id].jobHours) return message.channel.send("Use `r!ecoinit` before applying for white-collar jobs.")
 
                     //save job in money.json
                     money[message.author.id].job = args[1];
