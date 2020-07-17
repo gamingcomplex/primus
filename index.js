@@ -1068,7 +1068,7 @@ bot.on("message", message => {
                     .addField("⬜  Lawyer", "`100000` coin paycheck")
                 message.channel.send(careersEmbed);
             } else {
-                if (careers.includes(args[1]) && args[1].startsWith("🟦")) {
+                if (careers.includes(args[1])) {
 
                     //save job in money.json
                     money[message.author.id].job = args[1];
@@ -1085,24 +1085,7 @@ bot.on("message", message => {
                         .setColor("RANDOM")
                     message.channel.send(jobStart);
                 }
-                if (careers.includes(args[1]) && args[1].startsWith("⬜")) {
-                    if (!money[message.author.id].jobHours) return message.channel.send("Use `r!ecoinit` before applying for white-collar jobs.")
-
-                    //save job in money.json
-                    money[message.author.id].job = args[1];
-                    fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                        if (err) message.channel.send(`\`\`\`${err}\`\`\``)
-                    });
-
-                    //if user started a job
-                    const jobStart = new Discord.MessageEmbed()
-                        .setTitle("Job Accepted")
-                        .setDescription(`\`${message.author.tag}\` has started working as a \`${args[1]}\`.`)
-                        .setFooter("Use r!work to earn money at your job")
-                        .setThumbnail("https://img.favpng.com/8/3/11/office-icon-work-icon-png-favpng-0XRkELhR9NkkM5xVrh6bRrsz5.jpg")
-                        .setColor("RANDOM")
-                    message.channel.send(jobStart);
-                }
+                
             }
             break;
         case "confiemra":
