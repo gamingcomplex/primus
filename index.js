@@ -5,7 +5,7 @@ const fs = require("fs");
 const parsems = require("parse-ms")
 const money = require("./money.json")
 const mongoose = require("mongoose");
-const Data = require("./models/data")
+const Data = require("./data")
 const mongoPass = "mongodb://om86052:er29ma07@primus-shard-00-00.ylufd.mongodb.net:27017,primus-shard-00-01.ylufd.mongodb.net:27017,primus-shard-00-02.ylufd.mongodb.net:27017/<dbname>?ssl=true&replicaSet=atlas-65ny01-shard-0&authSource=admin&retryWrites=true&w=majority"
 
 const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XvpLxw.hmHLaGN6PIiGT_jK2qNqB0OOe4Y";
