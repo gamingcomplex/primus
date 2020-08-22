@@ -4,20 +4,21 @@ const ms = require("ms");
 const fs = require("fs");
 const parsems = require("parse-ms")
 const money = require("./money.json")
-const cooldowns = require("./cooldowns.json");
-const { monitorEventLoopDelay } = require("perf_hooks");
+const mongoose = require("mongoose");
+const Data = require("./models/data")
+const mongoPass = "mongodb://om86052:er29ma07@primus-shard-00-00.ylufd.mongodb.net:27017,primus-shard-00-01.ylufd.mongodb.net:27017,primus-shard-00-02.ylufd.mongodb.net:27017/<dbname>?ssl=true&replicaSet=atlas-65ny01-shard-0&authSource=admin&retryWrites=true&w=majority"
 
 const token = "NzE3NTMzNDQyOTQ1ODQzMzIx.XvpLxw.hmHLaGN6PIiGT_jK2qNqB0OOe4Y";
 
 const PREFIX = "r!";
 
-var version = "Official Release 1.2.6";
+var version = "Official Release 1.3.0";
 
 bot.on("ready", () => {
-    bot.user.setActivity("NOW ACCEPTING BOT DEVELOPERS, DM The Gaming Complex#3879", { type: "WATCHING" })
-    console.log("Bot has started!");
+    bot.user.setActivity("with the rules of the universe", { type: "PLAYING" })
+    console.log("Primus is always watching...");
 })
-var blacklist = ["703229714856411158"];
+var blacklist = [];
 
 bot.on("message", message => {
     if (blacklist.includes(message.author.id)) return;
@@ -65,6 +66,14 @@ bot.on("message", message => {
                             });
                     })
             }
+            break;
+        case "invite":
+            const inviteEmbed = new Discord.MessageEmbed()
+                .setTitle("Primus Invite")
+                .setDescription("Click on this link in order to invite Primus to your server. You may need to temporarily disable two-factor authentication.\nhttps://discord.com/oauth2/authorize?client_id=717533442945843321&scope=bot&permissions=2110258295")
+                .setColor("RANDOM")
+            message.channel.send(inviteEmbed);
+            break;
         case "ping":
             message.channel.send(`pong! Your ping is \`${Date.now() - message.createdTimestamp}\` ms.`)
             break;
@@ -102,7 +111,7 @@ bot.on("message", message => {
                     .addField("User Discriminator", message.author.discriminator)
                     .addField("Account Creation Date", message.author.createdAt)
                     .addField("Server Join Date", message.member.joinedAt)
-                    .setColor("#00d166")
+                    .setColor("RANDOM")
                     .setThumbnail(message.author.displayAvatarURL())
 
                 message.channel.send(embed);
@@ -119,124 +128,6 @@ bot.on("message", message => {
                 message.channel.send(userEmbed);
             }
             break;
-        case "rules":
-            const rulesEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Middle School Server Rules")
-                .addField("Rule 1", "No visual NSFW will be allowed. Light nsfw text and words are fine. Anything that is literal smut, or worse however, will not be allowed. Violation will result in a warning/mute/kick/ban depending on severity.")
-                .addField("Rule 2", "Profanity is allowed, but please do not direct it towards others, and if someone dislikes hearing/seeing profanity, please respect their wishes and try to turn it down. Violation will result in a warning, then a mute if repeatedly violated.")
-                .addField("Rule 2B", "Slurs(like the n word) will under no circumstances be tolerated. Violation will result in an immidiate mute, as well as a warning. Repeated violation will result in a kick or ban.")
-                .addField("Rule 3", "Do not spam/spam ping, for the former, go to #spamming, for the latter, don't do it at all. If you are caught doing either of these in the incorrect channel, it's a warn (further continuous spam may result in more warns/mutes/kicks/bans).")
-                .addField("Rule 3B", "Raiding, participating in, or starting a raid on this server will result in an instant ban. Non-negotiable.")
-                .addField("Rule 4", "Use the channels for their intended purpose. If an administrative figure tells you to move to a channel, do so. Violation will result in a mere reminder, but repeated defiance of administrative reminder will result in a warning.")
-                .addField("Rule 5", "Be reasonable with who you invite to this server. Only invite people that you really trust, or have connection to MUSD. If a person you invited causes trouble, there may be consequences depending upon the severity.")
-                .addField("Rule 6", "Only choose the proper roles for yourself. Violation will result in a warning.")
-                .addField("Rule 7", "Do not start arguments or drama in this server. If such things start anyways, take it to DMS. Violation will result in warnings, a mute, or even a kick if severe.")
-                .addField("Warnings", "Right now, you may accumulate up to 5 warnings. If you reach 5 warnings, you will be muted. After your mute is over, it will revert back to 4 warnings. If you accumulate 3 mutes, you will be kicked. 5 mutes will result in a ban. According to severity of incidents, some of these stages may be skipped. Bans may be appealed, but are unlikely accepted. Depending on the reason behind them, warnings may expire after a period of time.")
-                .addField("Administrative Rules", "Just because you are an administrative figure, doesn't mean you are above the rules. You are subject to the rules just like everyone elseDo not abuse your power in any way. This includes server sabotage, creating, editing, or deleting channels and roles without permission, removing warnings without approval, banning or kicking people for personal reasons, and other things that fall into this category. Violation will result in one black mark. For every administrative action you take, you must provide a detailed documentation(ex. screenshot on rule breaking.) Otherwise, the action may be challenged and invalidated. Three black marks will result in being instantly stripped of your position. Hopefully no one will ever reach that point. Depending on the reason behind a black mark, it may expire after a period of time. Depending also on severity, you may be instantly demoted, or given multiple marks for one incident.")
-                .setColor("#f93a2f")
-
-            message.author.send(rulesEmbed);
-            break;
-        case "nsfw":
-            const nsfwEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Middle School Rules")
-                .addField("Rule 1", "No visual NSFW will be allowed. Light nsfw text and words are fine. Anything that is literal smut, or worse however, will not be allowed. Violation will result in a warning/mute/kick/ban depending on severity.")
-                .setColor("#f8c300")
-                .setFooter("Type r!rules to have the full rules list dm'ed to you.")
-
-            message.channel.send(nsfwEmbed);
-            break;
-        case "profanity":
-            const profanityEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Middle School Rules")
-                .addField("Rule 2", "Profanity is allowed, but please do not direct it towards others, and if someone dislikes hearing/seeing profanity, please respect their wishes and try to turn it down. Violation will result in a warning, then a mute if repeatedly violated.")
-                .setColor("#f8c300")
-                .setFooter("Type r!rules to have the full rules list dm'ed to you.")
-
-            message.channel.send(profanityEmbed);
-            break;
-        case "slurs":
-            const slursEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Middle School Rules")
-                .addField("Rule 2B", "Slurs(like the n word) will under no circumstances be tolerated. Violation will result in an immidiate mute, as well as a warning. Repeated violation will result in a kick or ban.")
-                .setColor("#f8c300")
-                .setFooter("Type r!rules to have the full rules list dm'ed to you.")
-
-            message.channel.send(slursEmbed);
-            break;
-        case "spam":
-            const spamEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Middle School Rules")
-                .addField("Rule 3", "Do not spam/spam ping, for the former, go to #spamming, for the latter, don't do it at all. If you are caught doing either of these in the incorrect channel, it's a warn (further continuous spam may result in more warns/mutes/kicks/bans).")
-                .setColor("#f8c300")
-                .setFooter("Type r!rules to have the full rules list dm'ed to you.")
-
-            message.channel.send(spamEmbed);
-            break;
-        case "raiding":
-            const raidingEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Middle School Rules")
-                .addField("Rule 3B", "Raiding, participating in, or starting a raid on this server will result in an instant ban. Non-negotiable.")
-                .setColor("#f8c300")
-                .setFooter("Type r!rules to have the full rules list dm'ed to you.")
-
-            message.channel.send(raidingEmbed);
-            break;
-        case "channels":
-            const channelsEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Middle School Rules")
-                .addField("Rule 4", "Use the channels for their intended purpose. If an administrative figure tells you to move to a channel, do so. Violation will result in a mere reminder, but repeated defiance of administrative reminder will result in a warning.")
-                .setColor("#f8c300")
-                .setFooter("Type r!rules to have the full rules list dm'ed to you.")
-
-            message.channel.send(channelsEmbed);
-            break;
-        case "invites":
-            const invitesEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Middle School Rules")
-                .addField("Rule 5", "Be reasonable with who you invite to this server. Only invite people that you really trust, or have connection to MUSD. If a person you invited causes trouble, there may be consequences depending upon the severity.")
-                .setColor("#f8c300")
-                .setFooter("Type r!rules to have the full rules list dm'ed to you.")
-
-            message.channel.send(invitesEmbed);
-            break;
-        case "roles":
-            const rolesEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Middle School Rules")
-                .addField("Rule 6", "Only choose the proper roles for yourself. Violation will result in a warning.")
-                .setColor("#f8c300")
-                .setFooter("Type r!rules to have the full rules list dm'ed to you.")
-
-            message.channel.send(rolesEmbed);
-            break;
-        case "drama":
-            const dramaEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Middle School Rules")
-                .addField("Rule 7", "Do not start arguments or drama in this server. If such things start anyways, take it to DMS. Violation will result in warnings, a mute, or even a kick if severe.")
-                .setColor("#f8c300")
-                .setFooter("Type r!rules to have the full rules list dm'ed to you.")
-
-            message.channel.send(dramaEmbed);
-            break;
-        case "warnings":
-            const warningsEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Middle School Rules")
-                .addField("Warnings", "Right now, you may accumulate up to 5 warnings. If you reach 5 warnings, you will be muted. After your mute is over, it will revert back to 4 warnings. If you accumulate 3 mutes, you will be kicked. 5 mutes will result in a ban. According to severity of incidents, some of these stages may be skipped. Bans may be appealed, but are unlikely accepted. Depending on the reason behind them, warnings may expire after a period of time.")
-                .setColor("#f8c300")
-                .setFooter("Type r!rules to have the full rules list dm'ed to you.")
-
-            message.channel.send(warningsEmbed);
-            break;
-        case "adminrules":
-            const adminRulesEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Middle School Rules")
-                .addField("Administrative Rules", "Just because you are an administrative figure, doesn't mean you are above the rules. You are subject to the rules just like everyone elseDo not abuse your power in any way. This includes server sabotage, creating, editing, or deleting channels and roles without permission, removing warnings without approval, banning or kicking people for personal reasons, and other things that fall into this category. Violation will result in one black mark. For every administrative action you take, you must provide a detailed documentation(ex. screenshot on rule breaking.) Otherwise, the action may be challenged and invalidated. Three black marks will result in being instantly stripped of your position. Hopefully no one will ever reach that point. Depending on the reason behind a black mark, it may expire after a period of time. Depending also on severity, you may be instantly demoted, or given multiple marks for one incident.")
-                .setColor("#f8c300")
-                .setFooter("Type r!rules to have the full rules list dm'ed to you.")
-
-            message.channel.send(adminRulesEmbed);
-            break;
-
         case "clear":
             if (!message.member.roles.cache.some(r => r.name === "Moderators")) return message.channel.send("You need to have the `Moderators` role in order to use this command.")
 
@@ -494,10 +385,10 @@ bot.on("message", message => {
                 "Ofc not.",
                 "Maybe 🤔",
                 "wE'lL nEvEr KnOw... 👐",
-                "Only if you say that Rancho Bot is best bot in <#598727852103565332>",
+                "Only if you say that Primus is best bot in <#598727852103565332>",
                 "Ask again later 🕒",
                 "What part of \"Ask again Later\" don't you understand??? 😒",
-                "Only if my nickname is `Rancho Bot // r!`",
+                "Only if my nickname is `Primus // r!`",
                 "Not now, but maybe later.",
                 "Yes, but only for the time being.",
                 "ur mum gae LMAO roted!!!11!1!!!!funniiiiiiii!!!11!1!!!roasted-->rosted-->roted-->!!!11!!1!",
@@ -508,7 +399,7 @@ bot.on("message", message => {
             if (!args[1]) return message.channel.send("Mate, I can't give an answer to nothing.");
 
             const ballEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Bot's Magic 8 Ball 🎱")
+                .setTitle("Primus's Magic 8 Ball 🎱")
                 .addField("Question", args.slice(1).join(" "))
                 .addField("Answer", (answers[Math.floor(Math.random() * answers.length)]))
                 .addField("Asked by", message.author)
@@ -531,40 +422,29 @@ bot.on("message", message => {
                 .setThumbnail("https://img.icons8.com/cotton/2x/economic-growth-.png")
                 .setColor("32cd32")
 
-            if (!money[person.id]) {
-                money[person.id] = {
+            mongoose.connect(mongoPass, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+            });
+            Data.findOne({
+                userID: person.id
+
+            }, (err, data) => {
+                if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                const newData = new Data({
+                    name: bot.users.cache.get(person.id).username,
+                    userID: person.id,
+                    leaderboard: "all",
                     money: 500,
+                    daily: 0,
                     job: "",
-                }
-                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                    if (err) message.channel.send(`\`\`\`${err}\`\`\``)
-                });
+                    jobHours: 0
+                })
+                newData.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
                 message.channel.send(ecoinitEmbed
                     .setDescription("you have successfully been initialized into the currency system and given `500` coins.")
                 )
-            }
-
-            if (!money[person.id].job) {
-                money[person.id].job = ""
-
-                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                    if (err) message.channel.send(`\`\`\`${err}\`\`\``)
-                });
-                message.channel.send(ecoinitEmbed
-                    .setDescription("you have been entered into the Rancho Bot jobs database.")
-                )
-            }
-
-            if (!money[person.id].jobHours) {
-                money[person.id].jobHours = "0"
-
-                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                    if (err) message.channel.send(`\`\`\`${err}\`\`\``)
-                });
-                message.channel.send(ecoinitEmbed
-                    .setDescription("you have been entered into the Rancho Bot jobs database.")
-                )
-            }
+            })
             break;
         case "bal":
             if (!args[1]) {
@@ -573,51 +453,113 @@ bot.on("message", message => {
                 person = message.mentions.users.first()
             }
 
-            const balEmbed = new Discord.MessageEmbed()
-                .setTitle(`\`${person.tag}\`'s Balance`)
-                .setDescription(`Wallet: \`${money[person.id].money}\`\nBank: \`bruh Oliver hasn't coded this yet\``)
-                .setColor("RANDOM")
-            message.channel.send(balEmbed)
+            mongoose.connect(mongoPass, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+            });
+            Data.findOne({
+                userID: person.id
+
+            }, (err, data) => {
+                if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                if (!data) return message.channel.send("This user is not initialized into the currency system.")
+
+                const balEmbed = new Discord.MessageEmbed()
+                    .setTitle(`\`${person.tag}\`'s Balance`)
+                    .setDescription(`Wallet: \`${data.money}\`\n`)
+                    .setColor("RANDOM")
+                message.channel.send(balEmbed)
+            });
             break;
         case "give":
-            var minGive = 1;
+            mongoose.connect(mongoPass, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+            });
+            Data.findOne({
+                userID: message.author.id
+            }, (err, authorData) => {
+                if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                if (!authorData) return message.channel.send("You're not in the currency system yet. Run `ecoinit` to start using currency commands.")
 
-            if (!args[1]) return message.reply("you need to give your money to someone dumbo.");
+                Data.findOne({
+                    userID: person.id
+                }, (err, personData) => {
+                    if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                    if (!personData) return message.channel.send("This user is not initialized in the currency system.");
 
-            if (!person) return message.reply("I couldn't find that user.");
+                    if (!args[1]) return message.channel.send("Please specify which user you would like to transfer money to.");
+                    if (!person) return message.channel.send("I couldn't find that user.");
+                    if (!args[2]) return message.channel.send("Please specify the amount of money you are giving.");
+                    if (person.id === message.author.id) return message.channel.send("You cannot give money to yourself.");
 
-            if (!args[2]) return message.reply("how much are you giving dumbo");
+                    try {
+                        var giveAmount = parseFloat(args[2]);
+                    } catch {
+                        return message.channel.send("You can only pay in numbers.");
+                    }
 
-            try {
-                var giveAmount = parseFloat(args[2]);
-            } catch {
-                return message.reply("you can only pay in numbers. Who skipped kindergarten math?");
-            }
+                    if (giveAmount != Math.floor(giveAmount)) return message.channel.send("You can only pay in numbers.");
+                    if (giveAmount < 1) return message.channel.send(`You can't give less than 1 coin.`);
+                    if (authorData.money < giveAmount) return message.channel.send("You don't have enough money to complete this transfer.");
 
-            if (giveAmount != Math.floor(giveAmount)) return message.reply("give a whole number, not a decimal smh.");
+                    personData.money += giveAmount;
+                    authorData.money -= giveAmount;
+                    personData.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
+                    authorData.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
 
-            if (giveAmount < 1) return message.channel.send(`You can't give less than 1 coin wtf`)
-
-            if (!money[person.id]) return message.reply("this user is not yet initialized in the currency system.")
-
-            if (!money[message.author.id]) return message.channel.send("you have no money to give LMAO!!1!!!1!11!!!rosted")
-
-            if (money[message.author.id].money < giveAmount) return message.reply("you don't even have enough money to give LMAO POOR");
-
-            money[person.id].money += parseInt(args[2]);
-
-            money[message.author.id].money -= parseInt(args[2]);
-
-            fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                if (err) message.channel.send(`\`\`\`${err}\`\`\``);
+                    const giveEmbed = new Discord.MessageEmbed()
+                        .setTitle("Transaction Completed Successfully")
+                        .setDescription(`\`${message.author.tag}\` gave \`${giveAmount}\` coins.`)
+                        .setFooter("Sharing is caring but I don't care")
+                        .setColor("RANDOM")
+                    message.channel.send(giveEmbed);
+                })
             });
 
-            const giveEmbed = new Discord.MessageEmbed()
-                .setTitle("Transaction Completed Successfully")
-                .setDescription(`\`${message.author.tag}\` gave \`${giveAmount}\` coins.`)
-                .setFooter("Sharing is caring but I don't care")
-                .setColor("RANDOM")
-            message.channel.send(giveEmbed);
+            break;
+        case "board":
+            mongoose.connect(mongoPass, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+            });
+            Data.find({
+                leaderboard: "all"
+            }).sort([
+                ["money", "descending"]
+            ]).exec((err, res) => {
+                if (err) message.channel.send(`\`\`\`${err}\`\`\``);
+
+                var page = Math.ceil(res.length / 10);
+
+                const lbEmbed = new Discord.MessageEmbed()
+                    .setTitle(`Leaderboard for ${message.guild}`)
+                    .setThumbnail("https://img.icons8.com/bubbles/2x/leaderboard.png")
+                    .setColor("#ffaa1d")
+
+                let pg = parseInt(args[1]);
+                if (!pg) pg = 1;
+                if (pg != Math.floor(pg)) pg = 1;
+                let end = pg * 10;
+                let start = (pg * 10) - 10;
+
+                if (res.length === 0) {
+                    lbEmbed.addField("Error", "No leaderboard pages found");
+                } else if (res.length <= start) {
+                    lbEmbed.addField("Error", "Leaderboard page not found");
+                } else if (res.length <= end) {
+                    lbEmbed.setFooter(`Page ${pg} of ${page}`);
+                    for (i = start; i < res.length; i++) {
+                        lbEmbed.addField(`${i + 1}. ${res[i].name}`, `${res[i].money.toLocaleString()} coins`);
+                    }
+                } else {
+                    lbEmbed.setFooter(`Page ${pg} of ${page}`);
+                    for (i = start; i < end; i++) {
+                        lbEmbed.addField(`${i + 1}. ${res[i].name}`, `${res[i].money.toLocaleString()} coins`)
+                    }
+                }
+                message.channel.send(lbEmbed);
+            })
             break;
         case "daily":
             let timeout = 86400000;
@@ -626,120 +568,90 @@ bot.on("message", message => {
             let dailyEmbed = new Discord.MessageEmbed()
                 .setTitle("Daily Coins")
 
-            if (!money[message.author.id]) {
-                money[message.author.id] = {
-                    name: bot.users.cache.get(message.author.id).tag,
-                    money: reward
-                }
-                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                    if (err) message.channel.send(`\`\`\`${err}\`\`\``);
-                });
+            mongoose.connect(mongoPass, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+            });
+            Data.findOne({
+                userID: message.author.id
+            }, (err, data) => {
+                if (err) message.channel.send(`\`\`\`${err}\`\`\``)
+                if (!data) return message.channel.send("You're not in the currency system yet. Run `ecoinit` to start using currency commands.")
 
-                if (!cooldowns[message.author.id]) {
-                    cooldowns[message.author.id] = {
-                        name: bot.users.cache.get(message.author.id).tag,
-                        daily: Date.now()
-                    }
-                    fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
-                        if (err) message.channel.send(`\`\`\`${err}\`\`\``);
-                    });
+                if (timeout - (Date.now() - data.daily) > 0) {
+                    let timee = parsems(timeout - (Date.now() - data.daily));
+
+                    return message.channel.send(dailyEmbed
+                        .setColor("RANDOM")
+                        .setDescription("You already claimed your daily coins.")
+                        .addField("Claim in", `\`${timee.hours}h ${timee.minutes}m ${timee.seconds}s\``)
+                        .addField("User", message.author)
+                    );
                 } else {
-                    cooldowns[message.author.id].daily = Date.now();
-                    fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
-                        if (err) message.channel.send(`\`\`\`${err}\`\`\``);
-                    });
-                }
+                    data.money += reward;
+                    data.daily = Date.now()
+                    data.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
 
-                return message.channel.send(dailyEmbed.setDescription(`You claimed your daily reward and recieved \`${reward}\` coins. You now have \`${money[message.author.id].money}\` coins.`)
-                    .setColor("RANDOM")
-                );
-            } else {
-                if (!cooldowns[message.author.id]) {
-                    cooldowns[message.author.id] = {
-                        name: bot.users.cache.get(message.author.id).tag,
-                        daily: Date.now()
-                    }
-                    fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
-                        if (err) message.channel.send(`\`\`\`${err}\`\`\``);
-                    });
-
-                    money[message.author.id].money += reward;
-                    fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
-                        if (err) message.channel.send(`\`\`\`${err}\`\`\``);
-                    });
                     return message.channel.send(dailyEmbed.setDescription(`You claimed your daily reward and recieved \`${reward}\` coins. You now have \`${money[message.author.id].money}\` coins.`)
                         .setColor("RANDOM")
                     );
-                } else {
-                    if (timeout - (Date.now() - cooldowns[message.author.id].daily) > 0) {
-                        let timee = parsems(timeout - (Date.now() - cooldowns[message.author.id].daily));
-
-                        return message.channel.send(dailyEmbed
-                            .setColor("RANDOM")
-                            .setDescription("You already claimed your daily coins.")
-                            .addField("Claim in", `\`${timee.hours}h ${timee.minutes}m ${timee.seconds}s\``)
-                        );
-                    } else {
-                        money[message.author.id].money += reward;
-                        fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
-                            if (err) message.channel.send(`\`\`\`${err}\`\`\``);
-                        });
-                        cooldowns[message.author.id].daily = Date.now();
-                        fs.writeFile("./cooldowns.json", JSON.stringify(cooldowns), (err) => {
-                            if (err) message.channel.send(`\`\`\`${err}\`\`\``);
-                        });
-                        return message.channel.send(dailyEmbed.setDescription(`You claimed your daily reward and recieved \`${reward}\` coins. You now have \`${money[message.author.id].money}\` coins.`)
-                            .setColor("RANDOM")
-                        );
-                    }
                 }
-            }
+            })
+            break;
         case "bet":
-            var maxBet = 100000;
+            mongoose.connect(mongoPass, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+            });
+            Data.findOne({
+                userID: message.author.id
+            }, (err, data) => {
+                if (err) message.channel.send(`\`\`\`err\`\`\``);
+                if (!data) return message.channel.send("You're not in the currency system yet. Run `ecoinit` to start using currency commands.")
 
-            const betEmbed = new Discord.MessageEmbed()
-                .setTitle("Rancho Bot's Gambling Table 🎲")
+                var maxBet = 100000;
 
-            if (!money[message.author.id] || money[message.author.id].money <= 0) return message.reply("dream on you don't have any money lmao!!1!11!1!!!11!");
+                const betEmbed = new Discord.MessageEmbed()
+                    .setTitle("Primus's Money-Dissolving Gambling Table 🎲")
 
-            if (!args[1]) return message.reply("tell me what to bet smh.");
+                if (!args[1]) return message.channel.send("Please specify an amount to bet.");
 
-            if (args[1].toLowerCase() === "all") args[1] = money[message.author.id].money;
+                if (args[1].toLowerCase() === "all") args[1] = data.money;
 
-            try {
-                var bet = parseFloat(args[1]);
-            } catch {
-                return message.reply("you can only bet numbers. Who skipped kindergarten math?");
-            }
+                try {
+                    var bet = parseFloat(args[1]);
+                } catch {
+                    return message.channel.send("You can only bet whole numbers.");
+                }
 
-            if (bet != Math.floor(bet)) return message.reply("bet a whole number, not a decimal smh.");
+                if (bet != Math.floor(bet)) return message.channel.send("You can only bet whole numbers.");
 
-            if (money[message.author.id].money < bet) return message.reply("you don't even have enough money to cover your bet LMAO POOR");
+                if (money[message.author.id].money < bet) return message.channel.send("You don't have enough money to cover your bet.");
 
-            if (bet > maxBet) return message.channel.send(`You can't bet more than \`${maxBet.toLocaleString()}\` coins.`)
+                if (bet > maxBet) return message.channel.send(`You can't bet more than \`${maxBet.toLocaleString()}\` coins.`)
 
-            let betOutcomes = ["win", "lose"]
-            var pick = betOutcomes[Math.floor(Math.random() * betOutcomes.length)];
+                let betOutcomes = ["win", "lose"]
+                var pick = betOutcomes[Math.floor(Math.random() * betOutcomes.length)];
 
-            if (pick === "lose") {
-                money[message.author.id].money -= bet;
-                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                    if (err) message.channel.send(`\`\`\`${err}\`\`\``);
-                });
-                betEmbed.setDescription(`\`${message.author.tag}\` lost \`${bet}\` coins.`)
-                    .setFooter(`You now have ${money[message.author.id].money} coins.`)
-                    .setColor("#8b0000")
-                return message.channel.send(betEmbed);
-            } else {
-                money[message.author.id].money += bet;
-                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                    if (err) message.channel.send(`\`\`\`${err}\`\`\``);
-                });
-                betEmbed.setDescription(`\`${message.author.tag}\` won \`${bet}\` coins.`)
-                    .setFooter(`You now have ${money[message.author.id].money} coins.`)
-                    .setColor("#32cd32")
-                return message.channel.send(betEmbed);
-            }
+                if (pick === "lose") {
+                    data.money -= bet;
+                    data.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
+
+                    betEmbed.setDescription(`\`${message.author.tag}\` lost \`${bet}\` coins.`)
+                        .setFooter(`You now have ${data.money} coins.`)
+                        .setColor("#8b0000")
+                    return message.channel.send(betEmbed);
+                } else {
+                    data.money += bet;
+                    data.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
+
+                    betEmbed.setDescription(`\`${message.author.tag}\` won \`${bet}\` coins.`)
+                        .setFooter(`You now have ${data.money} coins.`)
+                        .setColor("#32cd32")
+                    return message.channel.send(betEmbed);
+                }
+            });
+            break;
         case "work":
             //list of jobs
             const careers = [
@@ -749,344 +661,342 @@ bot.on("message", message => {
                 "Lawyer"
             ]
 
-            if (!args[1]) {
+            mongoose.connect(mongoPass, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+            });
+            Data.findOne({
+                userID: message.author.id
+            }, (err, data) => {
+                if (err) message.channel.send(`\`\`\`err\`\`\``);
+                if (!data) return message.channel.send("You're not in the currency system yet. Run `ecoinit` to start using currency commands.")
 
-                if (!money[message.author.id].job) {
-                    //if user has no job
-                    const noWorkEmbed = new Discord.MessageEmbed()
-                        .setTitle("Command Failed")
-                        .setDescription("You don't currently have a job to work at.")
-                        .setFooter("Type r!work <job name here> to apply for that job.")
-                    message.channel.send(noWorkEmbed);
-                } else {
-                    //job minigames here
-                    var salary;
+                if (!args[1]) {
+                    if (!data.job) {
+                        //if user has no job
+                        const noWorkEmbed = new Discord.MessageEmbed()
+                            .setTitle("Command Failed")
+                            .setDescription("You don't currently have a job to work at.")
+                            .setFooter("Type r!work <job name here> to apply for that job.")
+                        message.channel.send(noWorkEmbed);
+                    } else {
+                        //job minigames here
+                        var salary;
 
-                    const workEmbed = new Discord.MessageEmbed()
-                        .setTitle(`Work for ${money[message.author.id].job}`)
-                        .setThumbnail("https://img.favpng.com/8/3/11/office-icon-work-icon-png-favpng-0XRkELhR9NkkM5xVrh6bRrsz5.jpg")
-                        .setColor("RANDOM")
-                    const workFinEmbed = new Discord.MessageEmbed()
-                        .setTitle("Successfully Finished Work")
-                        .setThumbnail("https://imageog.flaticon.com/icons/png/512/1019/1019607.png?size=1200x630f&pad=10,10,10,10&ext=png&bg=FFFFFFFF")
-                        .setColor("RANDOM")
-                    const workFailEmbed = new Discord.MessageEmbed()
-                        .setTitle("Work Failed")
-                        .setDescription("You did not type the correct message in the allowed time frame.")
-                        .setColor("RANDOM")
+                        const workEmbed = new Discord.MessageEmbed()
+                            .setTitle(`Work for ${data.job}`)
+                            .setThumbnail("https://img.favpng.com/8/3/11/office-icon-work-icon-png-favpng-0XRkELhR9NkkM5xVrh6bRrsz5.jpg")
+                            .setColor("RANDOM")
+                        const workFinEmbed = new Discord.MessageEmbed()
+                            .setTitle("Successfully Finished Work")
+                            .setThumbnail("https://imageog.flaticon.com/icons/png/512/1019/1019607.png?size=1200x630f&pad=10,10,10,10&ext=png&bg=FFFFFFFF")
+                            .setColor("RANDOM")
+                        const workFailEmbed = new Discord.MessageEmbed()
+                            .setTitle("Work Failed")
+                            .setDescription("You did not type the correct message in the allowed time frame.")
+                            .setColor("RANDOM")
 
-                    const workFilter = m => m.author.id === message.author.id;
+                        const workFilter = m => m.author.id === message.author.id;
 
-                    switch (money[message.author.id].job) {
-                        case "Oliver":
-                            const salary = 100000;
+                        switch (data.job) {
+                            case "Oliver":
+                                const salary = 100000;
 
-                            message.channel.send(workEmbed
-                                .setDescription("What is the 690th line of code for this bot?")
-                            ).then(() => {
-                                message.channel.awaitMessages(workFilter, {
-                                    max: 1,
-                                    time: 10000
-                                }).then(collected => {
-                                    if (collected.first().content === "if (err) message.channel.send(err);") {
-                                        message.channel.bulkDelete(1);
-                                        money[message.author.id].money += salary;
-                                        fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                                            if (err) message.channel.send(`\`\`\`${err}\`\`\``)
-                                        });
-                                        message.channel.send(workFinEmbed
-                                            .setDescription(`\`${message.author.tag}\` earned ${salary} coins at work for ${money[message.author.id].job} today.`)
-                                        );
-                                    }
-                                }).catch(collected => {
-                                    message.channel.send(workFailEmbed);
+                                message.channel.send(workEmbed
+                                    .setDescription("What is the 690th line of code for this bot?")
+                                ).then(() => {
+                                    message.channel.awaitMessages(workFilter, {
+                                        max: 1,
+                                        time: 10000
+                                    }).then(collected => {
+                                        if (collected.first().content === "if (err) message.channel.send(err);") {
+                                            message.channel.bulkDelete(1);
+                                            data.money += salary;
+                                            data.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
+
+                                            message.channel.send(workFinEmbed
+                                                .setDescription(`\`${message.author.tag}\` earned ${salary} coins at work for ${money[message.author.id].job} today.`)
+                                            );
+                                        }
+                                    }).catch(collected => {
+                                        message.channel.send(workFailEmbed);
+                                    });
+                                })
+                                break;
+                            case "Gas_Station_Clerk":
+                                const gscsalary = 500;
+
+                                message.channel.send(`🏪 ⛽ 🏎️`)
+                                message.channel.send(workEmbed
+                                    .setDescription("Pump the gas for the customer! Type `pump`.")
+                                ).then(() => {
+                                    message.channel.awaitMessages(workFilter, {
+                                        max: 1,
+                                        time: 4000
+                                    }).then(collected => {
+                                        if (collected.first().content === "pump") {
+                                            data.money += gscsalary;
+                                            data.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
+
+                                            message.channel.send(workFinEmbed
+                                                .setDescription(`\`${message.author.tag}\` earned ${gscsalary} coins at work for ${money[message.author.id].job} today.`)
+                                            );
+                                        } else return message.channel.send(workFailEmbed);
+                                    }).catch(collected => {
+                                        message.channel.send(workFailEmbed);
+                                    });
                                 });
-                            })
-                            break;
-                        case "Gas_Station_Clerk":
-                            const gscsalary = 500;
+                                break;
+                            case "Grocery_Store_Cashier":
+                                const gscashsalary = 800;
+                                const groceryItems = [
+                                    "🍎",
+                                    "🍊",
+                                    "🍇",
+                                    "🍓",
+                                    "🍒",
+                                    "🍑",
+                                    "🍍",
+                                    "🍅",
+                                    "🍆",
+                                    "🥦",
+                                    "🥬",
+                                    "🌽",
+                                    "🧅",
+                                    "🧄",
+                                    "🥔",
+                                    "🍞"
+                                ]
+                                let cashierItem1 = groceryItems[Math.floor(Math.random() * groceryItems.length)]
+                                let cashierItem2 = groceryItems[Math.floor(Math.random() * groceryItems.length)]
+                                let cashierItem3 = groceryItems[Math.floor(Math.random() * groceryItems.length)]
+                                let cashierItems = `${cashierItem1} ${cashierItem2} ${cashierItem3}`;
 
-                            message.channel.send(`🏪 ⛽ 🏎️`)
-                            message.channel.send(workEmbed
-                                .setDescription("Pump the gas for the customer! Type `pump`.")
-                            ).then(() => {
-                                message.channel.awaitMessages(workFilter, {
-                                    max: 1,
-                                    time: 4000
-                                }).then(collected => {
-                                    if (collected.first().content === "pump") {
-                                        money[message.author.id].money += gscsalary;
-                                        fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                                            if (err) message.channel.send(`\`\`\`${err}\`\`\``)
-                                        });
-                                        message.channel.send(workFinEmbed
-                                            .setDescription(`\`${message.author.tag}\` earned ${gscsalary} coins at work for ${money[message.author.id].job} today.`)
-                                        );
-                                    } else return message.channel.send(workFailEmbed);
-                                }).catch(collected => {
-                                    message.channel.send(workFailEmbed);
-                                });
-                            });
-                            break;
-                        case "Grocery_Store_Cashier":
-                            const gscashsalary = 800;
-                            const groceryItems = [
-                                "🍎",
-                                "🍊",
-                                "🍇",
-                                "🍓",
-                                "🍒",
-                                "🍑",
-                                "🍍",
-                                "🍅",
-                                "🍆",
-                                "🥦",
-                                "🥬",
-                                "🌽",
-                                "🧅",
-                                "🧄",
-                                "🥔",
-                                "🍞"
-                            ]
-                            let cashierItem1 = groceryItems[Math.floor(Math.random() * groceryItems.length)]
-                            let cashierItem2 = groceryItems[Math.floor(Math.random() * groceryItems.length)]
-                            let cashierItem3 = groceryItems[Math.floor(Math.random() * groceryItems.length)]
-                            let cashierItems = `${cashierItem1} ${cashierItem2} ${cashierItem3}`;
+                                message.channel.send(`🛒 ${cashierItems} 🖥️`)
+                                message.channel.send(workEmbed
+                                    .setDescription("Type the produce emojis in the order they come to the register!")
+                                ).then(() => {
+                                    message.channel.awaitMessages(workFilter, {
+                                        max: 1,
+                                        time: 10000
+                                    }).then(collected => {
+                                        if (collected.first().content === (`${cashierItem3} ${cashierItem2} ${cashierItem1}`)) {
+                                            data.money += gscashsalary;
+                                            data.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
 
-                            message.channel.send(`🛒 ${cashierItems} 🖥️`)
-                            message.channel.send(workEmbed
-                                .setDescription("Type the produce emojis in the order they come to the register!")
-                            ).then(() => {
-                                message.channel.awaitMessages(workFilter, {
-                                    max: 1,
-                                    time: 10000
-                                }).then(collected => {
-                                    if (collected.first().content === (`${cashierItem3} ${cashierItem2} ${cashierItem1}`)) {
-                                        money[message.author.id].money += gscashsalary;
-                                        fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                                            if (err) message.channel.send(`\`\`\`${err}\`\`\``)
-                                        });
-                                        message.channel.send(workFinEmbed
-                                            .setDescription(`\`${message.author.tag}\` earned ${gscashsalary} coins at work for ${money[message.author.id].job} today.`)
-                                        );
-                                    } else return message.channel.send(workFailEmbed);
-                                }).catch(collected => {
-                                    message.channel.send(workFailEmbed);
-                                });
-                            })
-                        case "Fast_Food_Cook":
-                            const ffcsalary = 1000;
-                            const burgers = [
-                                "hamburger",
-                                "cheeseburger",
-                                "hamburger with lettuce",
-                                "cheeseburger with lettuce",
-                                "hamburger with onion",
-                                "cheeseburger with onion",
-                                "hamburger with tomato",
-                                "cheeseburger with tomato",
-                                "hamburger with lettuce and onion",
-                                "cheeseburger with lettuce and onion",
-                                "hamburger with onion and tomato",
-                                "cheeseburger with onion and tomato",
-                                "hamburger with lettuce and tomato",
-                                "cheeseburger with lettuce and tomato",
-                                "hamburger with everything",
-                                "cheeseburger with everything"
-                            ]
-                            let currentBurger = burgers[Math.floor(Math.random() * burgers.length)];
+                                            message.channel.send(workFinEmbed
+                                                .setDescription(`\`${message.author.tag}\` earned ${gscashsalary} coins at work for ${money[message.author.id].job} today.`)
+                                            );
+                                        } else return message.channel.send(workFailEmbed);
+                                    }).catch(collected => {
+                                        message.channel.send(workFailEmbed);
+                                    });
+                                })
+                            case "Fast_Food_Cook":
+                                const ffcsalary = 1000;
+                                const burgers = [
+                                    "hamburger",
+                                    "cheeseburger",
+                                    "hamburger with lettuce",
+                                    "cheeseburger with lettuce",
+                                    "hamburger with onion",
+                                    "cheeseburger with onion",
+                                    "hamburger with tomato",
+                                    "cheeseburger with tomato",
+                                    "hamburger with lettuce and onion",
+                                    "cheeseburger with lettuce and onion",
+                                    "hamburger with onion and tomato",
+                                    "cheeseburger with onion and tomato",
+                                    "hamburger with lettuce and tomato",
+                                    "cheeseburger with lettuce and tomato",
+                                    "hamburger with everything",
+                                    "cheeseburger with everything"
+                                ]
+                                let currentBurger = burgers[Math.floor(Math.random() * burgers.length)];
 
-                            var correctBurger;
-                            switch (currentBurger) {
-                                //🥖🥩🧀🥬🧅🍅
-                                case "hamburger":
-                                    correctBurger = "🥖 🥩🥖"
-                                    break;
-                                case "cheeseburger":
-                                    correctBurger = "🥖 🧀 🥩 🥖"
-                                    break;
-                                case "hamburger with lettuce":
-                                    correctBurger = "🥖 🥬 🥩 🥖"
-                                    break;
-                                case "cheeseburger with lettuce":
-                                    correctBurger = "🥖 🥬 🧀 🥩 🥖"
-                                    break;
-                                case "hamburger with onion":
-                                    correctBurger = "🥖 🧅 🥩 🥖"
-                                    break;
-                                case "cheeseburger with onion":
-                                    correctBurger = "🥖 🧅 🧀 🥩 🥖"
-                                    break;
-                                case "hamburger with tomato":
-                                    correctBurger = "🥖 🍅 🥩 🥖"
-                                    break;
-                                case "cheeseburger with tomato":
-                                    correctBurger = "🥖 🍅 🧀 🥩 🥖"
-                                    break;
-                                case "hamburger with lettuce and onion":
-                                    correctBurger = "🥖 🥬 🧅 🥩 🥖"
-                                    break;
-                                case "cheeseburger with lettuce and onion":
-                                    correctBurger = "🥖 🥬 🧅 🧀 🥩 🥖"
-                                    break;
-                                case "hamburger with onion and tomato":
-                                    correctBurger = "🥖 🧅 🍅 🥩 🥖"
-                                    break;
-                                case "cheeseburger with onion and tomato":
-                                    correctBurger = "🥖 🧅 🍅 🧀 🥩 🥖"
-                                    break;
-                                case "hamburger with lettuce and tomato":
-                                    correctBurger = "🥖 🥬 🍅 🥩 🥖"
-                                    break;
-                                case "cheeseburger with lettuce and tomato":
-                                    correctBurger = "🥖 🥬 🍅 🧀 🥩 🥖"
-                                    break;
-                                case "hamburger with everything":
-                                    correctBurger = "🥖 🥬 🧅 🍅 🥩 🥖"
-                                    break;
-                                case "cheeseburger with everything":
-                                    correctBurger = "🥖 🥬 🧅 🍅 🧀 🥩 🥖"
-                                    break;
-                            }
+                                var correctBurger;
+                                switch (currentBurger) {
+                                    //🥖🥩🧀🥬🧅🍅
+                                    case "hamburger":
+                                        correctBurger = "🥖 🥩🥖"
+                                        break;
+                                    case "cheeseburger":
+                                        correctBurger = "🥖 🧀 🥩 🥖"
+                                        break;
+                                    case "hamburger with lettuce":
+                                        correctBurger = "🥖 🥬 🥩 🥖"
+                                        break;
+                                    case "cheeseburger with lettuce":
+                                        correctBurger = "🥖 🥬 🧀 🥩 🥖"
+                                        break;
+                                    case "hamburger with onion":
+                                        correctBurger = "🥖 🧅 🥩 🥖"
+                                        break;
+                                    case "cheeseburger with onion":
+                                        correctBurger = "🥖 🧅 🧀 🥩 🥖"
+                                        break;
+                                    case "hamburger with tomato":
+                                        correctBurger = "🥖 🍅 🥩 🥖"
+                                        break;
+                                    case "cheeseburger with tomato":
+                                        correctBurger = "🥖 🍅 🧀 🥩 🥖"
+                                        break;
+                                    case "hamburger with lettuce and onion":
+                                        correctBurger = "🥖 🥬 🧅 🥩 🥖"
+                                        break;
+                                    case "cheeseburger with lettuce and onion":
+                                        correctBurger = "🥖 🥬 🧅 🧀 🥩 🥖"
+                                        break;
+                                    case "hamburger with onion and tomato":
+                                        correctBurger = "🥖 🧅 🍅 🥩 🥖"
+                                        break;
+                                    case "cheeseburger with onion and tomato":
+                                        correctBurger = "🥖 🧅 🍅 🧀 🥩 🥖"
+                                        break;
+                                    case "hamburger with lettuce and tomato":
+                                        correctBurger = "🥖 🥬 🍅 🥩 🥖"
+                                        break;
+                                    case "cheeseburger with lettuce and tomato":
+                                        correctBurger = "🥖 🥬 🍅 🧀 🥩 🥖"
+                                        break;
+                                    case "hamburger with everything":
+                                        correctBurger = "🥖 🥬 🧅 🍅 🥩 🥖"
+                                        break;
+                                    case "cheeseburger with everything":
+                                        correctBurger = "🥖 🥬 🧅 🍅 🧀 🥩 🥖"
+                                        break;
+                                }
 
-                            message.channel.send(workEmbed
-                                .setDescription(`🤵 This customer wants a ${currentBurger}.\nMake the burger by typing the ingredients from left to right.\nBread = 🥖 Patty = 🥩 Cheese = 🧀 lettuce = 🥬 onion = 🧅 Tomato = 🍅`)
-                            ).then(() => {
-                                message.channel.awaitMessages(workFilter, {
-                                    max: 1,
-                                    time: 30000
-                                }).then(collected => {
-                                    if (collected.first().content === (correctBurger)) {
-                                        money[message.author.id].money += ffcsalary;
-                                        fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                                            if (err) message.channel.send(`\`\`\`${err}\`\`\``)
-                                        });
-                                        message.channel.send(workFinEmbed
-                                            .setDescription(`\`${message.author.tag}\` earned ${ffcsalary} coins at work for ${money[message.author.id].job} today.`)
-                                        );
-                                    } else return message.channel.send(workFailEmbed);
-                                }).catch(collected => {
-                                    message.channel.send(workFailEmbed);
-                                });
-                            })
-                        case "Lawyer":
-                            let courtOptions = [
-                                "guilty",
-                                "not guilty",
-                                "objection",
-                                "witness",
-                                "relavance"
-                            ]
-                            let currentCourt = courtOptions[Math.floor(Math.random() * courtOptions.length)];
+                                message.channel.send(workEmbed
+                                    .setDescription(`🤵 This customer wants a ${currentBurger}.\nMake the burger by typing the ingredients from left to right.\nBread = 🥖 Patty = 🥩 Cheese = 🧀 lettuce = 🥬 onion = 🧅 Tomato = 🍅`)
+                                ).then(() => {
+                                    message.channel.awaitMessages(workFilter, {
+                                        max: 1,
+                                        time: 30000
+                                    }).then(collected => {
+                                        if (collected.first().content === (correctBurger)) {
+                                            data.money += ffcsalary;
+                                            data.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
 
-                            var correctCourt;
-                            switch(currentCourt) {
-                                case "guilty":
-                                    correctCourt = "I hereby find the defendant guilty"
-                                    break;
-                                case "not guilty":
-                                    correctCourt = "I hereby find the defendant not guilty"
-                                    break;
-                                case "objection":
-                                    correctCourt = "Objection, your Honor"
-                                    break;
-                                case "witness":
-                                    correctCourt = "I hereby call the witness to the stand"
-                                    break;
-                                case "relavance":
-                                    correctCourt = "Objection, relavance?"
-                                    break;
-                            }
+                                            message.channel.send(workFinEmbed
+                                                .setDescription(`\`${message.author.tag}\` earned ${ffcsalary} coins at work for ${money[message.author.id].job} today.`)
+                                            );
+                                        } else return message.channel.send(workFailEmbed);
+                                    }).catch(collected => {
+                                        message.channel.send(workFailEmbed);
+                                    });
+                                })
+                            case "Lawyer":
+                                let courtOptions = [
+                                    "guilty",
+                                    "not guilty",
+                                    "objection",
+                                    "witness",
+                                    "relavance"
+                                ]
+                                let currentCourt = courtOptions[Math.floor(Math.random() * courtOptions.length)];
 
-                            message.channel.send(workEmbed
-                                .setDescription(`The jury has decided! Call a(n) ${currentCourt}`)
-                            ).then(() => {
-                                message.channel.awaitMessages(workFilter, {
-                                    max: 1,
-                                    time: 12000
-                                }).then(collected => {
-                                    if (collected.first().content === (correctCourt)) {
-                                        money[message.author.id].jobHours += 1;
-                                        fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                                            if (err) message.channel.send(`\`\`\`${err}\`\`\``)
-                                        });
-                                        message.channel.send(workFinEmbed
-                                            .setDescription("One hour of work was added to your paycheck.")
-                                        );
-                                    } else return message.channel.send(workFailEmbed);
-                                }).catch(collected => {
-                                    message.channel.send(workFailEmbed);
-                                });
-                            })
+                                var correctCourt;
+                                switch (currentCourt) {
+                                    case "guilty":
+                                        correctCourt = "I hereby find the defendant guilty"
+                                        break;
+                                    case "not guilty":
+                                        correctCourt = "I hereby find the defendant not guilty"
+                                        break;
+                                    case "objection":
+                                        correctCourt = "Objection, your Honor"
+                                        break;
+                                    case "witness":
+                                        correctCourt = "I hereby call the witness to the stand"
+                                        break;
+                                    case "relavance":
+                                        correctCourt = "Objection, relavance?"
+                                        break;
+                                }
+
+                                message.channel.send(workEmbed
+                                    .setDescription(`The jury has decided! Call a(n) ${currentCourt}`)
+                                ).then(() => {
+                                    message.channel.awaitMessages(workFilter, {
+                                        max: 1,
+                                        time: 12000
+                                    }).then(collected => {
+                                        if (collected.first().content === (correctCourt)) {
+                                            data.jobHours += 1;
+                                            data.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
+
+                                            message.channel.send(workFinEmbed
+                                                .setDescription("One hour of work was added to your paycheck.")
+                                            );
+                                        } else return message.channel.send(workFailEmbed);
+                                    }).catch(collected => {
+                                        message.channel.send(workFailEmbed);
+                                    });
+                                })
+                        }
                     }
                 }
-            }
-            //🟦⬜
-            if (args[1] === "Oliver" && message.author.id === "546208503841292288") {
-                money["546208503841292288"].job = "Oliver";
-                message.channel.send("yes master")
-                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                    if (err) message.channel.send(`\`\`\`${err}\`\`\``)
-                });
-            }
-            if (args[1] === "paycheck") {
-                if (!money[message.author.id].jobHours) return message.channel.send("lmao you're not even fully initialized into the currency system. Use ")
-
-                if (money[message.author.id].jobHours < 20) return message.channel.send(`You can't claim your paycheck yet. You still need to work for \`${20 - money[message.author.id].jobHours}\` hours.`)
-
-                var wage;
-
-                switch(money[message.author.id].job) {
-                    case "Lawyer":
-                        wage = 5000;
+                //🟦⬜
+                if (args[1] === "Oliver" && message.author.id === "546208503841292288") {
+                    data.job = "Oliver";
+                    message.channel.send("yes master")
+                    data.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
                 }
-                money[message.author.id].money += (wage * 20);
+                if (args[1] === "paycheck") {
+                    if (!data.jobHours) return message.channel.send("lmao you're not even fully initialized into the currency system. Use ")
 
-                const paycheckEmbed = new Discord.MessageEmbed()
-                    .setTitle("Paycheck Recieved")
-                    .setDescription(`You claimed your paycheck and recieved \`${wage * money[message.author.id].jobHours}\` coins.`)
-                    .addField("Job", money[message.author.id].job)
-                    .addField("Hours Worked", money[message.author.id].jobHours)
-                    .setThumbnail("https://cdn0.iconfinder.com/data/icons/jumpicon-financial-line-1/32/-_Paycheck-Salary-Envelope-Money-512.png")
-                    .setColor("RANDOM")
-                message.channel.send(paycheckEmbed);
+                    if (data.jobHours < 20) return message.channel.send(`You can't claim your paycheck yet. You still need to work for \`${20 - money[message.author.id].jobHours}\` hours.`)
 
-                money[message.author.id].jobHours = 0;
-                fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                    if (err) message.channel.send(`\`\`\`${err}\`\`\``)
-                });
-            }
-            if (args[1] === "careers") {
-                //job listings
-                const careersEmbed = new Discord.MessageEmbed()
-                    .setTitle("Available Job Listings  👨‍💼")
-                    .setFooter("Type r!work <job name here> to apply for that job.")
-                    .setColor("RANDOM")
-                    .addField("🟦  Gas_Station_Clerk", "`500` coins/hr")
-                    .addField("🟦  Grocery_Store_Cashier", "`800` coins/hr")
-                    .addField("🟦  Fast_Food_Cook", "`1000` coins/hr")
-                    .addField("⬜  Lawyer", "`100000` coin paycheck")
-                message.channel.send(careersEmbed);
-            } else {
-                if (careers.includes(args[1])) {
+                    var wage;
 
-                    //save job in money.json
-                    money[message.author.id].job = args[1];
-                    fs.writeFile("./money.json", JSON.stringify(money), (err) => {
-                        if (err) message.channel.send(`\`\`\`${err}\`\`\``)
-                    });
+                    switch (money[message.author.id].job) {
+                        case "Lawyer":
+                            wage = 5000;
+                    }
+                    data.money += (wage * 20);
 
-                    //if user started a job
-                    const jobStart = new Discord.MessageEmbed()
-                        .setTitle("Job Accepted")
-                        .setDescription(`\`${message.author.tag}\` has started working as a \`${args[1]}\`.`)
-                        .setFooter("Use r!work to earn money at your job")
-                        .setThumbnail("https://img.favpng.com/8/3/11/office-icon-work-icon-png-favpng-0XRkELhR9NkkM5xVrh6bRrsz5.jpg")
+                    const paycheckEmbed = new Discord.MessageEmbed()
+                        .setTitle("Paycheck Recieved")
+                        .setDescription(`You claimed your paycheck and recieved \`${wage * money[message.author.id].jobHours}\` coins.`)
+                        .addField("Job", money[message.author.id].job)
+                        .addField("Hours Worked", money[message.author.id].jobHours)
+                        .setThumbnail("https://cdn0.iconfinder.com/data/icons/jumpicon-financial-line-1/32/-_Paycheck-Salary-Envelope-Money-512.png")
                         .setColor("RANDOM")
-                    message.channel.send(jobStart);
+                    message.channel.send(paycheckEmbed);
+
+                    data.jobHours = 0;
+                    data.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
                 }
-                
-            }
+                if (args[1] === "careers") {
+                    //job listings
+                    const careersEmbed = new Discord.MessageEmbed()
+                        .setTitle("Available Job Listings  👨‍💼")
+                        .setFooter("Type r!work <job name here> to apply for that job.")
+                        .setColor("RANDOM")
+                        .addField("🟦  Gas_Station_Clerk", "`500` coins/hr")
+                        .addField("🟦  Grocery_Store_Cashier", "`800` coins/hr")
+                        .addField("🟦  Fast_Food_Cook", "`1000` coins/hr")
+                        .addField("⬜  Lawyer", "`100000` coin paycheck")
+                    message.channel.send(careersEmbed);
+                } else {
+                    if (careers.includes(args[1])) {
+
+                        //save job in money.json
+                        data.job = args[1];
+                        data.save().catch(err => message.channel.send(`\`\`\`${err}\`\`\``));
+
+                        //if user started a job
+                        const jobStart = new Discord.MessageEmbed()
+                            .setTitle("Job Accepted")
+                            .setDescription(`\`${message.author.tag}\` has started working as a \`${args[1]}\`.`)
+                            .setFooter("Use r!work to earn money at your job")
+                            .setThumbnail("https://img.favpng.com/8/3/11/office-icon-work-icon-png-favpng-0XRkELhR9NkkM5xVrh6bRrsz5.jpg")
+                            .setColor("RANDOM")
+                        message.channel.send(jobStart);
+                    }
+                }
+            });
             break;
         case "confiemra":
             if (!args[1]) {
